@@ -1,0 +1,50 @@
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color:#40E0D0;">
+  <a class="navbar-brand" href="#">Navbar w/ text</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarText">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" [routerLink]="['/']">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <!-- <li class="nav-item">
+        <a class="nav-link"  [routerLink]="['/singer-list']">Singer List</a>
+      </li>
+       <li class="nav-item">
+        <a class="nav-link"  [routerLink]="['/songs']">Songs</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link"  [routerLink]="['/beats']">Beats</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link"  [routerLink]="['/singlebeats']">SingleBeats</a>
+      </li> -->
+        <li class="nav-item">
+        <a class="nav-link"  [routerLink]="['/report']">Report</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link"  [routerLink]="['/reportgrid']">ReportGrid</a>
+      </li>
+        <li class="nav-item">
+        <a class="nav-link"  [routerLink]="['/statistic']">Statistic</a>
+      </li>
+      
+      <li class="nav-item">
+        <a class="nav-link" (click)="goToProfile()">Profile</a>
+      </li>
+      
+      
+      <!-- Eğer localStorage'da userId yoksa Login butonu görünür -->
+      <li class="nav-item" *ngIf="!isUserLoggedIn">
+        <a class="nav-link" [routerLink]="['/login']">Login</a>
+      </li>
+    </ul>
+    <span class="navbar-text">
+      <div *ngIf="activeSingleSong$ | async as activeSingleSong">
+        <h2>{{ activeSingleSong.name }}</h2> <!-- Aktif şarkı adı gösteriliyor -->
+      </div>
+    </span>
+  </div>
+</nav>
+<router-outlet></router-outlet>

@@ -1,0 +1,170 @@
+<div class="wrap">
+  <h1>Rapor İstatistikleri — Tek Tablo Pivot</h1>
+
+  <!-- 1) Tarih -->
+  <div class="card">
+    <h3>1) Tarih</h3>
+    <div class="row dates">
+      <div>
+        <label>Başlangıç</label>
+        <input type="date" [(ngModel)]="startDateStr">
+      </div>
+      <div>
+        <label>Bitiş</label>
+        <input type="date" [(ngModel)]="endDateStr">
+      </div>
+      <div class="right">
+        <button (click)="onFetch()">Hesapla</button>
+      </div>
+    </div>
+    <div class="hint">Aktif kayıt: <b>{{ factActive.length }}</b></div>
+  </div>
+
+  <!-- 2) Eksen & Kriter -->
+  <div class="card">
+    <h3>2) Eksen ve Kriter</h3>
+
+    <!-- üst kontroller -->
+    <div class="controls-grid">
+      <div class="control">
+        <div class="label">Satır</div>
+        <div class="pills">
+          <button [class.on]="rowMode==='City'" (click)="setRowMode('City')">Şehir</button>
+          <button [class.on]="rowMode==='Hospital'" (click)="setRowMode('Hospital')">Hastane</button>
+          <button [class.on]="rowMode==='CityHospital'" (click)="setRowMode('CityHospital')">Şehir → Hastane</button>
+        </div>
+      </div>
+
+      <div class="control">
+        <div class="label">Sütun</div>
+        <div class="pills">
+          <button [class.on]="criteriaType==='None'" (click)="setCriteriaType('None')">Yok</button>
+          <button [class.on]="criteriaType==='Diagnosis'" (click)="setCriteriaType('Diagnosis')">Tanı</button>
+          <button [class.on]="criteriaType==='ReportState'" (click)="setCriteriaType('ReportState')">Rapor Durumu</button>
+          <button [class.on]="criteriaType==='DiagAndState'" (click)="setCriteriaType('DiagAndState')">Tanı + Durum</button>
+        </div>
+
+        <!-- Kombine kolon hiyerarşi -->
+        <div class="pills" *ngIf="criteriaType==='DiagAndState'" style="margin-top:6px">
+          <span style="align-self:center;margin-right:6px">Hiyerarşi:</span>
+          <button [class.on]="colHierarchy==='DiagThenState'" (click)="setColHierarchy('DiagThenState')">Tanı → Durum</button>
+          <button [class.on]="colHierarchy==='StateThenDiag'" (click)="setColHierarchy('StateThenDiag')">Durum → Tanı</button>
+        </div>
+      </div>
+
+      <div class="control">
+        <div class="label">Yüzde tabanı</div>
+        <div class="pills">
+          <button [class.on]="percentBasis==='row'"    (click)="setPercent('row')">% Satır</button>
+          <button [class.on]="percentBasis==='column'" (click)="setPercent('column')">% Sütun</button>
+          <button [class.on]="percentBasis==='grand'"  (click)="setPercent('grand')">% Genel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Satır (Şehir/Hastane) – aç/kapat -->
+    <div class="slicer-section">
+      <div class="section-head" (click)="openRowSlicers=!openRowSlicers">
+        <span>Satır Filtreleri (Şehir &amp; Hastane)</span>
+        <span class="chev" [class.open]="openRowSlicers">▾</span>
+      </div>
+
+      <div class="slicers-grid collapsible" [class.open]="openRowSlicers">
+        <!-- Şehir -->
+        <div>
+          <div class="label">Şehir</div>
+          <div class="multi">
+            <div class="options">
+              <label *ngFor="let c of cities">
+                <input type="checkbox"
+                       [checked]="isSelected(selectedCityIds, c.id)"
+                       (change)="toggleCity(c.id)">
+                <span>{{ c.name }}</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hastane (şehir seçimine göre daralır) -->
+        <div>
+          <div class="label">Hastane</div>
+          <div class="multi">
+            <div class="options">
+              <label *ngFor="let h of hospitalsForUI()">
+                <input type="checkbox"
+                       [checked]="isSelected(selectedHospitalIds, h.id)"
+                       (change)="toggleHospital(h.id)">
+                <span>{{ h.name }}</span>
+              </label>
+            </div>
+          </div>
+          <div class="hint">İpucu: Önce şehir seçerek listeyi daraltabilirsin.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sütun (Tanı/Durum) – aç/kapat -->
+    <div class="slicer-section">
+      <div class="section-head" (click)="openColSlicers=!openColSlicers">
+        <span>Sütun Filtreleri (Tanı &amp; Rapor Durumu)</span>
+        <span class="chev" [class.open]="openColSlicers">▾</span>
+      </div>
+
+      <div class="slicers-grid collapsible" [class.open]="openColSlicers">
+        <!-- Tanı -->
+        <div>
+          <div class="label">Tanı</div>
+          <div class="multi">
+            <div class="options">
+              <label *ngFor="let d of diagnoses">
+                <input type="checkbox"
+                       [checked]="isSelected(selectedDiagnosisIds, d.id)"
+                       (change)="toggleDiagnosis(d.id)">
+                <span>{{ d.name }}</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rapor Durumu -->
+        <div>
+          <div class="label">Rapor Durumu</div>
+          <div class="multi">
+            <div class="options">
+              <label><input type="checkbox" [checked]="isSelected(selectedStates,'Onay')" (change)="toggleState('Onay')"> Onay</label>
+              <label><input type="checkbox" [checked]="isSelected(selectedStates,'Açıklama')" (change)="toggleState('Açıklama')"> Açıklama</label>
+              <label><input type="checkbox" [checked]="isSelected(selectedStates,'Manuel Açıklama')" (change)="toggleState('Manuel Açıklama')"> Manuel Açıklama</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 3) Pivot -->
+  <div class="card">
+    <h3>3) Sonuçlar</h3>
+    <div *ngIf="!factActive.length" class="hint">Tarih seçip <b>Hesapla</b>’ya basın.</div>
+
+    <div class="pivot-scroll" *ngIf="factActive.length">
+      <dx-pivot-grid
+        [dataSource]="pivotDs"
+        [allowSortingBySummary]="true"
+        [allowFiltering]="true"
+        [showBorders]="true"
+        [showColumnTotals]="true"
+        [showRowTotals]="true"
+        [showColumnGrandTotals]="true"
+        [showRowGrandTotals]="true"
+        [fieldPanel]="{
+          visible: true,
+          showFilterFields: true,
+          showRowFields: true,
+          showColumnFields: true,
+          showDataFields: true
+        }">
+      </dx-pivot-grid>
+    </div>
+  </div>
+</div>
