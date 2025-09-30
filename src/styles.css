@@ -1,1 +1,19 @@
 /* You can add global styles to this file, and also import other style files */
+/* wrapper alanın rengi */
+.pivot {
+  overflow: auto;
+  background: #fbfbfb;
+  padding: 8px; /* kenarlardan rengi görebilmek için */
+}
+
+
+.pivot .dx-pivotgrid,
+.pivot .dx-pivotgrid-container,
+.pivot .dx-pivotgrid .dx-area,
+.pivot .dx-pivotgrid .dx-area-data {
+  background: transparent !important;
+}
+
+
+.pivot .dx-grandtotal { background: rgba(17, 105, 163, 0.786) !important; color:#ffffff !important; }
+.pivot .dx-total      { background: rgba(124, 215, 216, 0.968) !important; color:#fff !important; }

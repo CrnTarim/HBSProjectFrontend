@@ -4,7 +4,7 @@
   <!-- 1) Tarih -->
   <div class="card section">
     <div class="section-headline">
-      <div class="badge">1</div><h3> Tarih</h3>
+      <div class="badge">1</div><h3>Tarih</h3>
     </div>
 
     <div class="row dates">
@@ -27,12 +27,12 @@
   <!-- 2) Eksen & Kriter -->
   <div class="card section">
     <div class="section-headline">
-      <div class="badge">2</div><h3> Eksen ve Kriter</h3>
+      <div class="badge">2</div><h3>Eksen ve Kriter</h3>
     </div>
 
     <!-- Bölge kutucukları -->
     <div class="block">
-      <div class="label">Bölge <span class="minor">(Onaylayan, Şehir, Hastane)</span></div>
+      <div class="label">Bölge <span class="minor"></span></div>
       <div class="pills">
         <button [class.on]="rowSelected.Issuer" (click)="toggleRow('Issuer')">Onaylayan</button>
         <button [class.on]="rowSelected.City" (click)="toggleRow('City')">Şehir</button>
@@ -42,7 +42,7 @@
 
     <!-- Bölge filtreleri -->
     <div class="block">
-      <div class="section-toggle" (click)="toggleRegionFilters()">
+      <div class="section-toggle" (click)="openRegionFilters = !openRegionFilters">
         <span>Bölge Filtreleri</span>
         <span class="chev" [class.open]="openRegionFilters">▾</span>
       </div>
@@ -55,10 +55,8 @@
             <div class="multi">
               <div class="options">
                 <label *ngFor="let c of cities">
-                  <input type="checkbox"
-                         [checked]="isSelected(selectedCityIds, c.id)"
-                         (change)="toggleCity(c.id)">
-                  <span>{{ c.name }}</span>
+                  <input type="checkbox" [checked]="isSelected(selectedCityIds, c.id)" (change)="toggleCity(c.id)">
+                  <span class="text">{{ c.name }}</span>
                 </label>
               </div>
             </div>
@@ -70,10 +68,8 @@
             <div class="multi">
               <div class="options">
                 <label *ngFor="let h of hospitalsForUI()">
-                  <input type="checkbox"
-                         [checked]="isSelected(selectedHospitalIds, h.id)"
-                         (change)="toggleHospital(h.id)">
-                  <span>{{ h.name }}</span>
+                  <input type="checkbox" [checked]="isSelected(selectedHospitalIds, h.id)" (change)="toggleHospital(h.id)">
+                  <span class="text">{{ h.name }}</span>
                 </label>
               </div>
             </div>
@@ -86,10 +82,8 @@
             <div class="multi">
               <div class="options">
                 <label *ngFor="let i of issuers">
-                  <input type="checkbox"
-                         [checked]="isSelected(selectedIssuers, i)"
-                         (change)="toggleIssuer(i)">
-                  <span>{{ i }}</span>
+                  <input type="checkbox" [checked]="isSelected(selectedIssuers, i)" (change)="toggleIssuer(i)">
+                  <span class="text">{{ i }}</span>
                 </label>
               </div>
             </div>
@@ -101,34 +95,23 @@
 
     <!-- Kriter kutucukları -->
     <div class="block">
-      <div class="label">Kriter <span class="minor">(tıklama sırası = hiyerarşi, max 3)</span></div>
+      <div class="label">Kriter <span class="minor"></span></div>
       <div class="pills">
-        <button class="with-rank"
-                [class.on]="columnRank('Diagnosis')"
-                (click)="toggleColumn('Diagnosis')">
-          Tanı
-          <span *ngIf="columnRank('Diagnosis')" class="rank">{{ columnRank('Diagnosis') }}</span>
+        <button class="with-rank" [class.on]="columnRank('Diagnosis')" (click)="toggleColumn('Diagnosis')">
+          Tanı <span *ngIf="columnRank('Diagnosis')" class="rank">{{ columnRank('Diagnosis') }}</span>
         </button>
-
-        <button class="with-rank"
-                [class.on]="columnRank('ReportState')"
-                (click)="toggleColumn('ReportState')">
-          Rapor Durumu
-          <span *ngIf="columnRank('ReportState')" class="rank">{{ columnRank('ReportState') }}</span>
+        <button class="with-rank" [class.on]="columnRank('ReportState')" (click)="toggleColumn('ReportState')">
+          Rapor Durumu <span *ngIf="columnRank('ReportState')" class="rank">{{ columnRank('ReportState') }}</span>
         </button>
-
-        <button class="with-rank"
-                [class.on]="columnRank('Decision')"
-                (click)="toggleColumn('Decision')">
-          Karar
-          <span *ngIf="columnRank('Decision')" class="rank">{{ columnRank('Decision') }}</span>
+        <button class="with-rank" [class.on]="columnRank('Decision')" (click)="toggleColumn('Decision')">
+          Karar <span *ngIf="columnRank('Decision')" class="rank">{{ columnRank('Decision') }}</span>
         </button>
       </div>
     </div>
 
     <!-- Kriter filtreleri -->
     <div class="block">
-      <div class="section-toggle" (click)="toggleCriteriaFilters()">
+      <div class="section-toggle" (click)="openCriteriaFilters = !openCriteriaFilters">
         <span>Kriter Filtreleri</span>
         <span class="chev" [class.open]="openCriteriaFilters">▾</span>
       </div>
@@ -141,23 +124,22 @@
             <div class="multi">
               <div class="options">
                 <label *ngFor="let d of diagnoses">
-                  <input type="checkbox"
-                         [checked]="isSelected(selectedDiagnosisIds, d.id)"
-                         (change)="toggleDiagnosis(d.id)">
-                  <span>{{ d.name }}</span>
+                  <input type="checkbox" [checked]="isSelected(selectedDiagnosisIds, d.id)" (change)="toggleDiagnosis(d.id)">
+                  <span class="text">{{ d.name }}</span>
                 </label>
               </div>
             </div>
           </div>
 
-          <!-- Rapor Durumu -->
+          <!-- Durum -->
           <div>
             <div class="sub-label">Durum filtresi</div>
             <div class="multi">
               <div class="options">
-                <label><input type="checkbox" [checked]="isSelected(selectedStates,'Onay')" (change)="toggleState('Onay')"> Onay</label>
-                <label><input type="checkbox" [checked]="isSelected(selectedStates,'Açıklama')" (change)="toggleState('Açıklama')"> Açıklama</label>
-                <label><input type="checkbox" [checked]="isSelected(selectedStates,'Manuel Açıklama')" (change)="toggleState('Manuel Açıklama')"> Manuel Açıklama</label>
+                <label *ngFor="let s of stateNames">
+                  <input type="checkbox" [checked]="isSelected(selectedStates, s)" (change)="toggleState(s)">
+                  <span class="text">{{ s }}</span>
+                </label>
               </div>
             </div>
           </div>
@@ -168,15 +150,13 @@
             <div class="multi">
               <div class="options">
                 <label *ngFor="let k of decisions">
-                  <input type="checkbox"
-                         [checked]="isSelected(selectedDecisionIds, k.id)"
-                         (change)="toggleDecision(k.id)">
-                  <span>{{ k.name }} ({{k.code}})</span>
+                  <input type="checkbox" [checked]="isSelected(selectedDecisionIds, k.id)" (change)="toggleDecision(k.id)">
+                  <span class="text">{{ k.name }} ({{k.code}})</span>
                 </label>
               </div>
             </div>
+            <div class="hint">İpucu: Onaylayan filtresi üstte.</div>
           </div>
-
         </div>
       </div>
     </div>
@@ -192,22 +172,19 @@
     </div>
   </div>
 
-  <!-- 3) Pivot + İndir -->
+  <!-- 3) Pivot -->
   <div class="card section">
     <div class="section-headline" style="justify-content:space-between;">
       <div style="display:flex;align-items:center;gap:10px;">
-        <div class="badge">3</div><h3> Sonuçlar</h3>
-      </div>
-      <div class="pills">
-        <button (click)="exportExcel()">Excel İndir</button>
+        <div class="badge">3</div><h3>Sonuçlar</h3>
       </div>
     </div>
 
     <div *ngIf="!factActive.length" class="hint">Tarih seçip <b>Hesapla</b>’ya basın.</div>
 
-    <div class="pivot-scroll" *ngIf="factActive.length">
+    <div class="pivot" *ngIf="factActive.length">
       <dx-pivot-grid
-        [dataSource]="pivotDs"
+        [dataSource]="pivotDs"  
         [allowSortingBySummary]="true"
         [allowFiltering]="true"
         [showBorders]="true"
