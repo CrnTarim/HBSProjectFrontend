@@ -11,18 +11,19 @@ button.on{ background:#ecfeff; color:#0f172a; border-color:#06b6d4; }
 .block{ display:flex; flex-direction:column; gap:8px; }
 .pills{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
 .label{ font-weight:700; color:#0f172a; }
-.label .minor{ font-size:.85em; color:#475569; margin-left:6px; }
 .sub-label{ font-weight:600; margin:4px 0 6px; color:#0f172a; }
 .section-toggle{ display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; cursor:pointer; user-select:none; font-weight:600; color:#0f172a; }
 .chev{ transition: transform .2s ease; }
 .chev.open{ transform: rotate(180deg); }
 .collapsible{ overflow:hidden; max-height:0; opacity:0; transition:max-height .25s ease, opacity .2s ease, margin-top .2s ease; }
-.collapsible.open{ max-height:700px; opacity:1; margin-top:6px; }
+.collapsible.open{ max-height:720px; opacity:1; margin-top:6px; }
 .multi{ border:1px solid #e2e8f0; border-radius:8px; padding:8px; max-height:240px; overflow:auto; }
+.multi.decisions{ max-height:300px; overflow:auto; } /* karar filtresi için ekstra */
 .options{ display:grid; grid-template-columns:1fr; gap:4px; }
-.hint{ color:#64748b; }
-.pivot{ overflow:auto;}
-.with-rank{ padding-right:28px; }
 .options label, .options label .text { color:#0f172a; }
+.hint{ color:#64748b; }
+.pivot{ overflow:auto; }
+.with-rank{ padding-right:28px; }
 .rank{ position:absolute; right:6px; top:6px; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; }
 @media (max-width: 700px){ .row{ grid-template-columns: 1fr; } }
+

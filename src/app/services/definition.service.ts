@@ -1,13 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import type {
-  CityDto,
-  DiagnosisDto,
-  FactReport,
-  HCDecisionDto,
-  HospitalDto
-} from '../models/definition';
+import { CityDto, DiagnosisDto, FactReport, HCDecisionDto, HospitalDto } from '../models/definition';
+
 
 @Injectable({ providedIn: 'root' })
 export class DefinitionService {
@@ -45,5 +40,4 @@ export class DefinitionService {
   }
 }
 
-// tipleri yeniden dışa aktar
-export type { FactReport, CityDto, HospitalDto, DiagnosisDto, HCDecisionDto };
+

@@ -1,59 +1,55 @@
-// Tipler — controller projeksiyonuna bire bir uyumlu
-
-export type Guid = string;
-
-export interface CityDto {
-  id: string;
-  code: number;     // önceki: cityCode
-  name: string;     // önceki: cityName
+export class CityDto {
+  id: string = '';
+  code: number = 0;
+  name: string = '';
 }
 
-
-export interface HospitalDto {
-  id: Guid;
-  code: number;
-  name: string;
-  cityId: Guid;
+export class HospitalDto {
+  id: string = '';
+  code: number = 0;
+  name: string = '';
+  cityId: string = '';
 }
 
-export interface DiagnosisDto {
-  id: Guid;
-  code: string;
-  name: string;
+export class DiagnosisDto {
+  id: string = '';
+  code: string = '';
+  name: string = '';
 }
 
-export interface HCDecisionDto {
-  id: Guid;
-  code: number;
-  name: string;
-  teminOnay: 0 | 1;
-  bakanlikOnay: 0 | 1;
+export class HCDecisionDto {
+  id: string = '';
+  code: number = 0;
+  name: string = '';
+  teminOnay: 0 | 1 = 0;
+  bakanlikOnay: 0 | 1 = 0;
 }
 
-export interface FactReport {
-  reportId: Guid;
-  reportCode: number;
-  createdDate: string;          
-  reportState: number;
-  reportStateName: string;
+export class FactReport {
+  reportId: string = '';
+  reportCode: number = 0;
+  createdDate: string = '';
 
-  cityId: Guid;     
-  cityCode: number;     
-  cityName: string;
+  reportState: number = 0;
+  reportStateName: string = '';
 
-  hospitalId: Guid; 
-  hospitalCode: number; 
-  hospitalName: string;
-  provisionId: Guid; 
-  provisionCode: string;
+  cityId: string = '';
+  cityCode: number = 0;
+  cityName: string = '';
 
-  diagnosisId: Guid | null;
-  diagnosisCode: string | null;
-  diagnosisName: string | null;
+  hospitalId: string = '';
+  hospitalCode: number = 0;
+  hospitalName: string = '';
+  provisionId: string = '';
+  provisionCode: string = '';
 
-  decisionId: Guid | null;
-  decisionCode: number | null;
-  decisionName: string | null;
+  diagnosisId: string | null = null;
+  diagnosisCode: string | null = null;
+  diagnosisName: string | null = null;
 
-  issuer: 'MB' | 'PTM' | 'BH';
+  decisionId: string | null = null;
+  decisionCode: number | null = null;
+  decisionName: string | null = null;
+
+  issuer: 'MB' | 'PTM' | 'BH' = 'BH';
 }

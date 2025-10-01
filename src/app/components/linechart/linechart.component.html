@@ -30,28 +30,27 @@
       <div class="badge">2</div><h3>Eksen ve Kriter</h3>
     </div>
 
-    <!-- Bölge kutucukları -->
+    <!-- Bölge pilleri -->
     <div class="block">
-      <div class="label">Bölge <span class="minor"></span></div>
+      <div class="label">Bölge</div>
       <div class="pills">
-        <button [class.on]="rowSelected.Issuer" (click)="toggleRow('Issuer')">Onaylayan</button>
-        <button [class.on]="rowSelected.City" (click)="toggleRow('City')">Şehir</button>
+        <button [class.on]="rowSelected.Issuer"   (click)="toggleRow('Issuer')">Onaylayan</button>
+        <button [class.on]="rowSelected.City"     (click)="toggleRow('City')">Şehir</button>
         <button [class.on]="rowSelected.Hospital" (click)="toggleRow('Hospital')">Hastane</button>
       </div>
     </div>
 
     <!-- Bölge filtreleri -->
     <div class="block">
-      <div class="section-toggle" (click)="openRegionFilters = !openRegionFilters">
-        <span>Bölge Filtreleri</span>
-        <span class="chev" [class.open]="openRegionFilters">▾</span>
-      </div>
+      <div class="inline-grid3">
 
-      <div class="collapsible" [class.open]="openRegionFilters">
-        <div class="inline-grid3">
-          <!-- Şehir -->
-          <div>
-            <div class="sub-label">Şehir filtresi</div>
+        <!-- Şehir -->
+        <div>
+          <div class="section-toggle" (click)="openOnlyRegion('City')">
+            <span>Şehir filtresi</span>
+            <span class="chev" [class.open]="openCity">▾</span>
+          </div>
+          <div class="collapsible" [class.open]="openCity">
             <div class="multi">
               <div class="options">
                 <label *ngFor="let c of cities">
@@ -61,10 +60,15 @@
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Hastane -->
-          <div>
-            <div class="sub-label">Hastane filtresi</div>
+        <!-- Hastane -->
+        <div>
+          <div class="section-toggle" (click)="openOnlyRegion('Hospital')">
+            <span>Hastane filtresi</span>
+            <span class="chev" [class.open]="openHospital">▾</span>
+          </div>
+          <div class="collapsible" [class.open]="openHospital">
             <div class="multi">
               <div class="options">
                 <label *ngFor="let h of hospitalsForUI()">
@@ -75,10 +79,15 @@
             </div>
             <div class="hint">İpucu: Şehir seçmek listeyi daraltır.</div>
           </div>
+        </div>
 
-          <!-- Onaylayan -->
-          <div>
-            <div class="sub-label">Onaylayan filtresi</div>
+        <!-- Onaylayan -->
+        <div>
+          <div class="section-toggle" (click)="openOnlyRegion('Issuer')">
+            <span>Onaylayan filtresi</span>
+            <span class="chev" [class.open]="openIssuer">▾</span>
+          </div>
+          <div class="collapsible" [class.open]="openIssuer">
             <div class="multi">
               <div class="options">
                 <label *ngFor="let i of issuers">
@@ -90,12 +99,13 @@
             <div class="hint">Satırda görmek için yukarıdan “Onaylayan”ı aç.</div>
           </div>
         </div>
+
       </div>
     </div>
 
-    <!-- Kriter kutucukları -->
+    <!-- Kriter pilleri -->
     <div class="block">
-      <div class="label">Kriter <span class="minor"></span></div>
+      <div class="label">Kriter</div>
       <div class="pills">
         <button class="with-rank" [class.on]="columnRank('Diagnosis')" (click)="toggleColumn('Diagnosis')">
           Tanı <span *ngIf="columnRank('Diagnosis')" class="rank">{{ columnRank('Diagnosis') }}</span>
@@ -111,16 +121,14 @@
 
     <!-- Kriter filtreleri -->
     <div class="block">
-      <div class="section-toggle" (click)="openCriteriaFilters = !openCriteriaFilters">
-        <span>Kriter Filtreleri</span>
-        <span class="chev" [class.open]="openCriteriaFilters">▾</span>
-      </div>
-
-      <div class="collapsible" [class.open]="openCriteriaFilters">
-        <div class="inline-grid3">
-          <!-- Tanı -->
-          <div>
-            <div class="sub-label">Tanı filtresi</div>
+      <div class="inline-grid3">
+        <!-- Tanı -->
+        <div>
+          <div class="section-toggle" (click)="openOnlyCriteria('Diagnosis')">
+            <span>Tanı filtresi</span>
+            <span class="chev" [class.open]="openDiagnosis">▾</span>
+          </div>
+          <div class="collapsible" [class.open]="openDiagnosis">
             <div class="multi">
               <div class="options">
                 <label *ngFor="let d of diagnoses">
@@ -130,10 +138,15 @@
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Durum -->
-          <div>
-            <div class="sub-label">Durum filtresi</div>
+        <!-- Durum -->
+        <div>
+          <div class="section-toggle" (click)="openOnlyCriteria('ReportState')">
+            <span>Durum filtresi</span>
+            <span class="chev" [class.open]="openState">▾</span>
+          </div>
+          <div class="collapsible" [class.open]="openState">
             <div class="multi">
               <div class="options">
                 <label *ngFor="let s of stateNames">
@@ -143,11 +156,16 @@
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Karar -->
-          <div>
-            <div class="sub-label">Karar filtresi</div>
-            <div class="multi">
+        <!-- Karar -->
+        <div>
+          <div class="section-toggle" (click)="openOnlyCriteria('Decision')">
+            <span>Karar filtresi</span>
+            <span class="chev" [class.open]="openDecision">▾</span>
+          </div>
+          <div class="collapsible" [class.open]="openDecision">
+            <div class="multi decisions">
               <div class="options">
                 <label *ngFor="let k of decisions">
                   <input type="checkbox" [checked]="isSelected(selectedDecisionIds, k.id)" (change)="toggleDecision(k.id)">
@@ -184,7 +202,7 @@
 
     <div class="pivot" *ngIf="factActive.length">
       <dx-pivot-grid
-        [dataSource]="pivotDs"  
+        [dataSource]="pivotDs"
         [allowSortingBySummary]="true"
         [allowFiltering]="true"
         [showBorders]="true"
