@@ -3,7 +3,8 @@ import PivotGridDataSource from 'devextreme/ui/pivot_grid/data_source';
 import { forkJoin } from 'rxjs';
 import { DefinitionService } from '../../services/definition.service';
 import {
-  CityDto, HospitalDto, DiagnosisDto, HCDecisionDto, FactReport
+  CityDto, HospitalDto, DiagnosisDto, HCDecisionDto, FactReport,
+  DatetimeInput
 } from '../../models/definition';
 
 type Issuer = 'MB' | 'PTM' | 'BH';
@@ -22,11 +23,12 @@ export class LinechartComponent implements OnInit {
   /* ---- Tarih ---- */
   startDateStr = '';
   endDateStr   = '';
+  datetimeInput: DatetimeInput = { StartDate: '', EndDate: '' };
 
   /* ---- Yüzde ekseni ---- */
   percentBasis: PercentBasis = 'row';
 
-  /* ---- Lookuplar (DOĞRUDAN DTO) ---- */
+  /* ---- Lookuplar ---- */
   cities: CityDto[] = [];
   hospitals: HospitalDto[] = [];
   diagnoses: DiagnosisDto[] = [];
@@ -34,10 +36,10 @@ export class LinechartComponent implements OnInit {
   stateNames: string[] = [];
 
   /* ---- Slicer seçimleri ---- */
-  selectedCityIds: string[] = [];
-  selectedHospitalIds: string[] = [];
-  selectedDiagnosisIds: string[] = [];
-  selectedDecisionIds: string[] = [];
+  selectedCityIds: any[] = [];
+  selectedHospitalIds: any[] = [];
+  selectedDiagnosisIds: any[] = [];
+  selectedDecisionIds: any[] = [];
   selectedStates: string[] = [];
   issuers: Issuer[] = ['MB','PTM','BH'];
   selectedIssuers: Issuer[] = [];
@@ -59,8 +61,15 @@ export class LinechartComponent implements OnInit {
   openCity = false; openHospital = false; openIssuer = false;
   openDiagnosis = false; openState = false; openDecision = false;
 
+  /* ================== SEARCH STATE ================== */
+  citySearch = '';
+  hospitalSearch = '';
+  diagnosisSearch = '';
+  decisionSearch = '';
+  stateSearch = '';
+
   /* ================== INIT ================== */
-  ngOnInit(): void {
+ ngOnInit(): void {
     this.initDefaultDates();
 
     forkJoin([
@@ -76,15 +85,18 @@ export class LinechartComponent implements OnInit {
         this.diagnoses  = diagnoses  || [];
         this.decisions  = decisions  || [];
         this.stateNames = states     || [];
-        this.onFetch(); // açılış
+        this.onFetch(); 
       },
       function(err){ console.error('Lookup load failed', err); }
     );
+
   }
 
   /* ================== DATE HELPERS ================== */
   private pad2(n:number){ return n<10 ? '0'+n : ''+n; }
-  private toInputDate(d: Date){ return d.getFullYear() + '-' + this.pad2(d.getMonth()+1) + '-' + this.pad2(d.getDate()); }
+  private toInputDate(d: Date){
+    return d.getFullYear() + '-' + this.pad2(d.getMonth()+1) + '-' + this.pad2(d.getDate());
+  }
   private initDefaultDates(){
     var end = new Date();
     var start = new Date(end.getTime() - 30*86400000);
@@ -97,100 +109,173 @@ export class LinechartComponent implements OnInit {
     if (!this.startDateStr || !this.endDateStr){
       this.factAll=[]; this.factActive=[]; this.pivotDs=null; return;
     }
-    var self = this;
-    this.api.getFact(this.startDateStr, this.endDateStr).subscribe(
-      function(rows){
-        rows = rows || [];
-        self.factAll = rows.map(function(r: FactReport){
-          return Object.assign({}, r, { created: new Date(r.createdDate as string) });
+    this.datetimeInput.StartDate = this.startDateStr;
+    this.datetimeInput.EndDate   = this.endDateStr;
+
+    this.api.getFact(this.datetimeInput).subscribe(
+      (rows: any[]) => {
+        const data = (rows || []).map(function(r: any){
+          return { ...r, created: new Date(r.createdDate as string) };
         });
-        self.factActive = self.factAll.slice(0);
-        self.updatePivot();
+        this.factAll = data;
+        this.factActive = data.slice();
+        this.updatePivot();
       },
-      function(err){ console.error('getFact error', err); self.factAll=[]; self.factActive=[]; self.pivotDs=null; }
+      err => { console.error('getFact error', err); this.factAll=[]; this.factActive=[]; this.pivotDs=null; }
     );
   }
 
-//     onFetch(): void {
-//   if (!this.startDateStr || !this.endDateStr){
-//     this.factAll=[]; this.factActive=[]; this.pivotDs=null; return;
-//   }
-//   this.api.getFact(this.startDateStr, this.endDateStr).subscribe(
-//     rows => {
-//       const data = (rows || []).map(r => ({ ...r, created: new Date(r.createdDate as string) }));
-//       this.factAll = data;
-//       this.factActive = data.slice();
-//       this.updatePivot();
-//     },
-//     err => { console.error('getFact error', err); this.factAll=[]; this.factActive=[]; this.pivotDs=null; }
-//   );
-// }
+  /* ================== SEARCH HELPERS ================== */
+  private _match(q: string, text: any): boolean {
+    if (!q) return true;
+    if (text == null) return false;
+    return String(text).toLowerCase().indexOf(q.toLowerCase()) !== -1;
+  }
 
   /* ================== UI HELPERS ================== */
   hospitalsForUI(): HospitalDto[] {
-    if (!this.selectedCityIds.length) return this.hospitals;
-    var s = new Set(this.selectedCityIds);
-    return this.hospitals.filter(function(h){ return s.has(h.cityId as string); });
+    if (!this.selectedCityIds.length) {
+      return this.hospitals;
+    }
+    const s = new Set(this.selectedCityIds.map(String));
+    return this.hospitals.filter(h => s.has(String(h.cityId)));
   }
+
+  hospitalsForUIFiltered(): HospitalDto[] {
+    const base = this.hospitalsForUI();
+    if (!this.hospitalSearch) return base;
+    return base.filter(h => this._match(this.hospitalSearch, h.name));
+  }
+
+  citiesFiltered(): CityDto[] {
+    if (!this.citySearch) return this.cities;
+    return this.cities.filter(c => this._match(this.citySearch, c.name));
+  }
+
+  diagnosesFiltered(): DiagnosisDto[] {
+    if (!this.diagnosisSearch) return this.diagnoses;
+    return this.diagnoses.filter(d => this._match(this.diagnosisSearch, d.name));
+  }
+
+  decisionsFiltered(): HCDecisionDto[] {
+    if (!this.decisionSearch) return this.decisions;
+    return this.decisions.filter(k =>
+      this._match(this.decisionSearch, k.name) || this._match(this.decisionSearch, k.code)
+    );
+  }
+
+  statesFiltered(): string[] {
+    if (!this.stateSearch) return this.stateNames;
+    return this.stateNames.filter(s => this._match(this.stateSearch, s));
+  }
+
   isSelected(arr: any[], id: any){ return arr.indexOf(id) !== -1; }
+
   private toggleIn<T>(arr: T[], v: T): T[] {
-    var i = arr.indexOf(v);
-    return i >= 0 ? (arr.filter(function(x){ return x !== v; }) as any) : arr.concat(v);
+    const i = arr.indexOf(v);
+    return i >= 0 ? (arr.filter(x => x !== v) as any) : arr.concat(v);
   }
 
-  toggleCity(id: string){ this.selectedCityIds = this.toggleIn(this.selectedCityIds, id); this.applyFilters(); }
-  toggleHospital(id: string){ this.selectedHospitalIds = this.toggleIn(this.selectedHospitalIds, id); this.applyFilters(); }
-  toggleDiagnosis(id: string){ this.selectedDiagnosisIds = this.toggleIn(this.selectedDiagnosisIds, id); this.applyFilters(); }
-  toggleDecision(id: string){ this.selectedDecisionIds = this.toggleIn(this.selectedDecisionIds, id); this.applyFilters(); }
-  toggleState(name: string){ this.selectedStates = this.toggleIn(this.selectedStates, name); this.applyFilters(); }
-  toggleIssuer(name: Issuer){ this.selectedIssuers = this.toggleIn(this.selectedIssuers, name); this.applyFilters(); }
+  /* ================== TOGGLES ================== */
+  toggleCity(id: any) {
+    this.selectedCityIds = this.toggleIn(this.selectedCityIds, id);
+    this.applyFilters();
+  }
 
-  openOnlyRegion(which: 'City'|'Hospital'|'Issuer'){
+  toggleHospital(id: any) {
+    this.selectedHospitalIds = this.toggleIn(this.selectedHospitalIds, id);
+    this.applyFilters();
+  }
+
+  toggleDiagnosis(id: any) {
+    this.selectedDiagnosisIds = this.toggleIn(this.selectedDiagnosisIds, id);
+    this.applyFilters();
+  }
+
+  toggleDecision(id: any) {
+    this.selectedDecisionIds = this.toggleIn(this.selectedDecisionIds, id);
+    this.applyFilters();
+  }
+
+  toggleState(name: string) {
+    this.selectedStates = this.toggleIn(this.selectedStates, name);
+    this.applyFilters();
+  }
+
+  toggleIssuer(name: Issuer) {
+    this.selectedIssuers = this.toggleIn(this.selectedIssuers, name);
+    this.applyFilters();
+  }
+
+  /* ================== PANEL AÇ/KAPA ================== */
+  openOnlyRegion(which: 'City' | 'Hospital' | 'Issuer') {
     this.openCity     = (which === 'City')     ? !this.openCity     : false;
     this.openHospital = (which === 'Hospital') ? !this.openHospital : false;
     this.openIssuer   = (which === 'Issuer')   ? !this.openIssuer   : false;
   }
-  openOnlyCriteria(which: 'Diagnosis'|'ReportState'|'Decision'){
+
+  openOnlyCriteria(which: 'Diagnosis' | 'ReportState' | 'Decision') {
     this.openDiagnosis = (which === 'Diagnosis')   ? !this.openDiagnosis : false;
     this.openState     = (which === 'ReportState') ? !this.openState     : false;
     this.openDecision  = (which === 'Decision')    ? !this.openDecision  : false;
   }
 
-  public toggleRow(kind: 'Issuer'|'City'|'Hospital'){
+  /* ================== ROW TOGGLE ================== */
+  public toggleRow(kind: 'Issuer' | 'City' | 'Hospital') {
     (this.rowSelected as any)[kind] = !(this.rowSelected as any)[kind];
-    if (!this.rowSelected.Issuer && !this.rowSelected.City && !this.rowSelected.Hospital) {
+
+    if (!this.rowSelected.Issuer &&
+        !this.rowSelected.City &&
+        !this.rowSelected.Hospital) {
       (this.rowSelected as any)[kind] = true;
     }
+
     this.openOnlyRegion(kind);
     this.updatePivot();
   }
 
   /* ================== PIVOT ================== */
   private buildFields(): any[] {
-    var fields: any[] = [];
+    const fields: any[] = [];
 
-    var issuer: any = { dataField: 'issuer', caption: 'Onaylayan' };
-    if (this.rowSelected.Issuer) issuer.area = 'row';
+    // Satır alanları
+    const issuer: any = { dataField: 'issuer', caption: 'Onaylayan' };
+    if (this.rowSelected.Issuer) { issuer.area = 'row'; }
     fields.push(issuer);
 
-    if (this.rowSelected.City)     fields.push({ dataField: 'cityName', caption: 'Şehir', area: 'row' });
-    if (this.rowSelected.Hospital) fields.push({ dataField: 'hospitalName', caption: 'Hastane', area: 'row' });
-
-    for (var i=0; i<this.columnOrder.length; i++) {
-      var k = this.columnOrder[i];
-      if (k === 'Diagnosis')        fields.push({ dataField: 'diagnosisName',   caption: 'Tanı',          area: 'column' });
-      else if (k === 'ReportState') fields.push({ dataField: 'reportStateName', caption: 'Rapor Durumu',  area: 'column' });
-      else                          fields.push({ dataField: 'decisionName',    caption: 'Karar',         area: 'column' });
+    if (this.rowSelected.City) {
+      fields.push({ dataField: 'cityName', caption: 'Şehir', area: 'row' });
+    }
+    if (this.rowSelected.Hospital) {
+      fields.push({ dataField: 'hospitalName', caption: 'Hastane', area: 'row' });
     }
 
+    // Sütun alanları (kriterler)
+    for (let i = 0; i < this.columnOrder.length; i++) {
+      const k = this.columnOrder[i];
+      if (k === 'Diagnosis') {
+        fields.push({ dataField: 'diagnosisName', caption: 'Tanı', area: 'column' });
+      } else if (k === 'ReportState') {
+        fields.push({ dataField: 'reportStateName', caption: 'Rapor Durumu', area: 'column' });
+      } else {
+        fields.push({ dataField: 'decisionName', caption: 'Karar', area: 'column' });
+      }
+    }
+
+    // Veri alanları
     fields.push({ caption: 'Rapor (count)', area: 'data', dataField: 'reportId', summaryType: 'count' });
 
-    var mode = this.percentBasis === 'row' ? 'percentOfRowTotal'
-            : this.percentBasis === 'column' ? 'percentOfColumnTotal'
-            : 'percentOfGrandTotal';
+    const mode = this.percentBasis === 'row'
+      ? 'percentOfRowTotal'
+      : (this.percentBasis === 'column' ? 'percentOfColumnTotal' : 'percentOfGrandTotal');
+
     fields.push({
-      caption: 'Oran', area: 'data', dataField: 'reportId', summaryType: 'count',
-      summaryDisplayMode: mode, format: { type: 'percent', precision: 2 }
+      caption: 'Oran',
+      area: 'data',
+      dataField: 'reportId',
+      summaryType: 'count',
+      summaryDisplayMode: mode,
+      format: { type: 'percent', precision: 2 }
     });
 
     return fields;
@@ -199,15 +284,15 @@ export class LinechartComponent implements OnInit {
   public updatePivot(): void {
     if (!this.factActive.length){ this.pivotDs=null; return; }
     this.pivotDs = new PivotGridDataSource({ fields: this.buildFields(), store: this.factActive });
-    var self = this;
+    const self = this;
     setTimeout(function(){ self.applyFilters(); });
   }
 
-  private buildNameMap(list: { id?: string; name?: string }[]): Map<string, string> {
-    var m = new Map<string, string>();
-    for (var i=0; i<list.length; i++) {
-      var x = list[i];
-      if (x && x.id && x.name) m.set(x.id, x.name);
+  private buildNameMap(list: { id?: any; name?: any }[]): Map<string, string> {
+    const m = new Map<string, string>();
+    for (let i=0; i<list.length; i++) {
+      const x: any = list[i];
+      if (x && x.id != null && x.name != null) m.set(String(x.id), String(x.name));
     }
     return m;
   }
@@ -215,15 +300,15 @@ export class LinechartComponent implements OnInit {
   private applyFilters(): void {
     if (!this.pivotDs) return;
 
-    var cityMap = this.buildNameMap(this.cities);
-    var hospMap = this.buildNameMap(this.hospitals);
-    var diagMap = this.buildNameMap(this.diagnoses);
-    var decMap  = this.buildNameMap(this.decisions);
+    const cityMap = this.buildNameMap(this.cities);
+    const hospMap = this.buildNameMap(this.hospitals);
+    const diagMap = this.buildNameMap(this.diagnoses);
+    const decMap  = this.buildNameMap(this.decisions);
 
-    function namesFrom(ids: string[], m: Map<string,string>) {
-      var out: string[] = [];
-      for (var i=0; i<ids.length; i++) {
-        var val = m.get(ids[i]);
+    function namesFrom(ids: any[], m: Map<string,string>) {
+      const out: string[] = [];
+      for (let i=0; i<ids.length; i++) {
+        const val = m.get(String(ids[i]));
         if (val) out.push(val);
       }
       return out;
@@ -259,11 +344,14 @@ export class LinechartComponent implements OnInit {
 
   /* ---- Kriter pilleri ---- */
   toggleColumn(kind: ColumnKey){
-    var i = this.columnOrder.indexOf(kind);
+    const i = this.columnOrder.indexOf(kind);
     if (i >= 0) this.columnOrder.splice(i, 1);
     else { if (this.columnOrder.length === 3) this.columnOrder.shift(); this.columnOrder.push(kind); }
     this.openOnlyCriteria(kind);
     this.updatePivot();
   }
-  columnRank(kind: ColumnKey){ var i = this.columnOrder.indexOf(kind); return i >= 0 ? i+1 : null; }
+  columnRank(kind: ColumnKey){
+    const i = this.columnOrder.indexOf(kind);
+    return i >= 0 ? i+1 : null;
+  }
 }

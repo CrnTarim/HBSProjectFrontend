@@ -53,3 +53,8 @@ export class FactReport {
 
   issuer: 'MB' | 'PTM' | 'BH' = 'BH';
 }
+// models/datetime-input.model.ts
+export interface DatetimeInput {
+  StartDate: string; 
+  EndDate: string;
+}

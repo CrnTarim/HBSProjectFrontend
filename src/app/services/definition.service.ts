@@ -1,3 +1,4 @@
+import { DatetimeInput } from './../models/definition';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -11,9 +12,10 @@ export class DefinitionService {
 
   constructor(private http: HttpClient) {}
 
-   getFact(start: string, end: string): Observable<FactReport[]> {
-    return this.http.get<FactReport[]>(`${this.url}/stats/fact`, { params: { start, end } });
-  }
+getFact(date: DatetimeInput): Observable<FactReport[]> {
+  return this.http.post<FactReport[]>(`${this.url}/stats/fact`, date);
+}
+
 
   getCities(): Observable<CityDto[]> {
     return this.http.get<CityDto[]>(`${this.url}/cities`);

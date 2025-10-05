@@ -1,5 +1,5 @@
 <div class="wrap">
-  <h1>Rapor İstatistikleri — Tek Tablo Pivot</h1>
+  <h1>Rapor İstatistikleri</h1>
 
   <!-- 1) Tarih -->
   <div class="card section">
@@ -51,9 +51,13 @@
             <span class="chev" [class.open]="openCity">▾</span>
           </div>
           <div class="collapsible" [class.open]="openCity">
+
+            <!-- Arama -->
+            <input type="text" placeholder="Şehir ara..." [(ngModel)]="citySearch" class="searchbox">
+
             <div class="multi">
               <div class="options">
-                <label *ngFor="let c of cities">
+                <label *ngFor="let c of citiesFiltered()">
                   <input type="checkbox" [checked]="isSelected(selectedCityIds, c.id)" (change)="toggleCity(c.id)">
                   <span class="text">{{ c.name }}</span>
                 </label>
@@ -69,9 +73,13 @@
             <span class="chev" [class.open]="openHospital">▾</span>
           </div>
           <div class="collapsible" [class.open]="openHospital">
+
+            <!-- Arama -->
+            <input type="text" placeholder="Hastane ara..." [(ngModel)]="hospitalSearch" class="searchbox">
+
             <div class="multi">
               <div class="options">
-                <label *ngFor="let h of hospitalsForUI()">
+                <label *ngFor="let h of hospitalsForUIFiltered()">
                   <input type="checkbox" [checked]="isSelected(selectedHospitalIds, h.id)" (change)="toggleHospital(h.id)">
                   <span class="text">{{ h.name }}</span>
                 </label>
@@ -129,9 +137,13 @@
             <span class="chev" [class.open]="openDiagnosis">▾</span>
           </div>
           <div class="collapsible" [class.open]="openDiagnosis">
+
+            <!-- Arama -->
+            <input type="text" placeholder="Tanı ara..." [(ngModel)]="diagnosisSearch" class="searchbox">
+
             <div class="multi">
               <div class="options">
-                <label *ngFor="let d of diagnoses">
+                <label *ngFor="let d of diagnosesFiltered()">
                   <input type="checkbox" [checked]="isSelected(selectedDiagnosisIds, d.id)" (change)="toggleDiagnosis(d.id)">
                   <span class="text">{{ d.name }}</span>
                 </label>
@@ -147,9 +159,13 @@
             <span class="chev" [class.open]="openState">▾</span>
           </div>
           <div class="collapsible" [class.open]="openState">
+
+            <!-- Arama -->
+            <input type="text" placeholder="Durum ara..." [(ngModel)]="stateSearch" class="searchbox">
+
             <div class="multi">
               <div class="options">
-                <label *ngFor="let s of stateNames">
+                <label *ngFor="let s of statesFiltered()">
                   <input type="checkbox" [checked]="isSelected(selectedStates, s)" (change)="toggleState(s)">
                   <span class="text">{{ s }}</span>
                 </label>
@@ -165,9 +181,13 @@
             <span class="chev" [class.open]="openDecision">▾</span>
           </div>
           <div class="collapsible" [class.open]="openDecision">
+
+            <!-- Arama -->
+            <input type="text" placeholder="Karar ara (ad/kod)..." [(ngModel)]="decisionSearch" class="searchbox">
+
             <div class="multi decisions">
               <div class="options">
-                <label *ngFor="let k of decisions">
+                <label *ngFor="let k of decisionsFiltered()">
                   <input type="checkbox" [checked]="isSelected(selectedDecisionIds, k.id)" (change)="toggleDecision(k.id)">
                   <span class="text">{{ k.name }} ({{k.code}})</span>
                 </label>
