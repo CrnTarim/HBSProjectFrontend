@@ -34,6 +34,28 @@ export class LinechartComponent implements OnInit {
   diagnoses: DiagnosisDto[] = [];
   decisions: HCDecisionDto[] = [];
   stateNames: string[] = [];
+  private static REPORT_STATE_TR: { [k: string]: string } = {
+ Review: 'İncelemede',
+  Approval: 'Onayda',
+  Completed: 'Tamamlandı',
+ CompletedWithNoApproval: 'Onaysız Tamamlandı',
+  Annotation: 'Ek Açıklama',
+  AnnotationReportApproval: 'Ek Rapor Onay',
+  AnnotationReportReview: 'Ek Rapor İnceleme',
+  CompletedWithAnnotationApproval: 'Ek Onay ile Tamamlandı',
+  WaitingForReview: 'İnceleme Bekliyor',
+   WaitingForCompletedWithNoApproval: 'Onaysız Tamamlama Bekliyor',
+   Cancelled: 'İptal',
+  CompletedAnnotationManuel: 'Manuel Ek Açıklama Tam.'
+};
+
+private static REPORT_STATES_EN: string[] = [
+  'Review','Approval','Completed','CompletedWithNoApproval','Annotation',
+  'AnnotationReportApproval','AnnotationReportReview','CompletedWithAnnotationApproval',
+  'WaitingForReview','WaitingForCompletedWithNoApproval','Cancelled','CompletedAnnotationManuel'
+];
+
+
 
   /* ---- Slicer seçimleri ---- */
   selectedCityIds: any[] = [];
@@ -85,13 +107,17 @@ export class LinechartComponent implements OnInit {
         this.diagnoses  = diagnoses  || [];
         this.decisions  = decisions  || [];
         this.stateNames = states     || [];
-        this.onFetch(); 
+        this.onFetch();
       },
       function(err){ console.error('Lookup load failed', err); }
     );
 
-  }
+     this.stateNames =  LinechartComponent.REPORT_STATES_EN.slice();
+     this.onFetch();
 
+  }
+  
+  trState(k: string){ return LinechartComponent.REPORT_STATE_TR[k] || k || ''; }
   /* ================== DATE HELPERS ================== */
   private pad2(n:number){ return n<10 ? '0'+n : ''+n; }
   private toInputDate(d: Date){
@@ -164,10 +190,20 @@ export class LinechartComponent implements OnInit {
     );
   }
 
-  statesFiltered(): string[] {
-    if (!this.stateSearch) return this.stateNames;
-    return this.stateNames.filter(s => this._match(this.stateSearch, s));
-  }
+ statesFiltered(): string[] {
+
+  if (!this.stateSearch) return this.stateNames;
+
+  const q = this.stateSearch;
+
+  return this.stateNames.filter(s =>
+
+    this._match(q, s) || this._match(q, this.trState(s))
+
+  );
+
+
+}
 
   isSelected(arr: any[], id: any){ return arr.indexOf(id) !== -1; }
 
@@ -253,10 +289,24 @@ export class LinechartComponent implements OnInit {
     // Sütun alanları (kriterler)
     for (let i = 0; i < this.columnOrder.length; i++) {
       const k = this.columnOrder[i];
-      if (k === 'Diagnosis') {
-        fields.push({ dataField: 'diagnosisName', caption: 'Tanı', area: 'column' });
+      if (k === 'Diagnosis') {  
+      fields.push({ dataField: 'diagnosisCode', caption: 'Tanı (Kod)', area: 'column' });
       } else if (k === 'ReportState') {
-        fields.push({ dataField: 'reportStateName', caption: 'Rapor Durumu', area: 'column' });
+        fields.push({
+
+        dataField: 'reportStateName',   // EN anahtar ile gelir
+
+        caption: 'Rapor Durumu',
+
+        area: 'column',
+
+        customizeText: (cellInfo: any) => {
+
+          const raw = (cellInfo && (cellInfo.valueText || cellInfo.text || cellInfo.value)) || '';
+
+          return this.trState(String(raw)); // ekranda TR göster
+
+        }});
       } else {
         fields.push({ dataField: 'decisionName', caption: 'Karar', area: 'column' });
       }
@@ -297,12 +347,21 @@ export class LinechartComponent implements OnInit {
     return m;
   }
 
+  private buildCodeMap<T extends { id?: any }>(list: T[], prop: keyof T): Map<string, any> {
+  const m = new Map<string, any>();
+  for (let i = 0; i < list.length; i++) {
+    const x: any = list[i];
+    if (x && x.id != null && x[prop] != null) m.set(String(x.id), x[prop]);
+  }
+  return m;
+}
+
   private applyFilters(): void {
     if (!this.pivotDs) return;
 
     const cityMap = this.buildNameMap(this.cities);
     const hospMap = this.buildNameMap(this.hospitals);
-    const diagMap = this.buildNameMap(this.diagnoses);
+    const diagCodeMap = this.buildCodeMap(this.diagnoses, 'code');  
     const decMap  = this.buildNameMap(this.decisions);
 
     function namesFrom(ids: any[], m: Map<string,string>) {
@@ -313,6 +372,7 @@ export class LinechartComponent implements OnInit {
       }
       return out;
     }
+    
 
     this.pivotDs.field('issuer', {
       filterType: this.selectedIssuers.length ? 'include' : undefined,
@@ -326,9 +386,9 @@ export class LinechartComponent implements OnInit {
       filterType: this.selectedHospitalIds.length ? 'include' : undefined,
       filterValues: namesFrom(this.selectedHospitalIds, hospMap)
     });
-    this.pivotDs.field('diagnosisName', {
+    this.pivotDs.field('diagnosisCode', {
       filterType: this.selectedDiagnosisIds.length ? 'include' : undefined,
-      filterValues: namesFrom(this.selectedDiagnosisIds, diagMap)
+      filterValues: namesFrom(this.selectedDiagnosisIds, diagCodeMap)
     });
     this.pivotDs.field('reportStateName', {
       filterType: this.selectedStates.length ? 'include' : undefined,

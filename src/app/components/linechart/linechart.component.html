@@ -145,7 +145,7 @@
               <div class="options">
                 <label *ngFor="let d of diagnosesFiltered()">
                   <input type="checkbox" [checked]="isSelected(selectedDiagnosisIds, d.id)" (change)="toggleDiagnosis(d.id)">
-                  <span class="text">{{ d.name }}</span>
+                  <span class="text">{{ d.code }}</span>
                 </label>
               </div>
             </div>
@@ -166,9 +166,11 @@
             <div class="multi">
               <div class="options">
                 <label *ngFor="let s of statesFiltered()">
-                  <input type="checkbox" [checked]="isSelected(selectedStates, s)" (change)="toggleState(s)">
-                  <span class="text">{{ s }}</span>
-                </label>
+                <input type="checkbox"
+                      [checked]="isSelected(selectedStates, s)"
+                      (change)="toggleState(s)">
+                <span class="text">{{ trState(s) }}</span> <!-- EN yerine TR -->
+              </label>
               </div>
             </div>
           </div>
