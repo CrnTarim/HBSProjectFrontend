@@ -35,27 +35,24 @@ export class LinechartComponent implements OnInit {
   decisions: HCDecisionDto[] = [];
   stateNames: string[] = [];
   private static REPORT_STATE_TR: { [k: string]: string } = {
- Review: 'İncelemede',
-  Approval: 'Onayda',
-  Completed: 'Tamamlandı',
- CompletedWithNoApproval: 'Onaysız Tamamlandı',
-  Annotation: 'Ek Açıklama',
-  AnnotationReportApproval: 'Ek Rapor Onay',
-  AnnotationReportReview: 'Ek Rapor İnceleme',
-  CompletedWithAnnotationApproval: 'Ek Onay ile Tamamlandı',
-  WaitingForReview: 'İnceleme Bekliyor',
-   WaitingForCompletedWithNoApproval: 'Onaysız Tamamlama Bekliyor',
-   Cancelled: 'İptal',
-  CompletedAnnotationManuel: 'Manuel Ek Açıklama Tam.'
-};
-
-private static REPORT_STATES_EN: string[] = [
-  'Review','Approval','Completed','CompletedWithNoApproval','Annotation',
-  'AnnotationReportApproval','AnnotationReportReview','CompletedWithAnnotationApproval',
-  'WaitingForReview','WaitingForCompletedWithNoApproval','Cancelled','CompletedAnnotationManuel'
-];
-
-
+    Review: 'İncelemede',
+    Approval: 'Onayda',
+    Completed: 'Tamamlandı',
+    CompletedWithNoApproval: 'Onaysız Tamamlandı',
+    Annotation: 'Ek Açıklama',
+    AnnotationReportApproval: 'Ek Rapor Onay',
+    AnnotationReportReview: 'Ek Rapor İnceleme',
+    CompletedWithAnnotationApproval: 'Ek Onay ile Tamamlandı',
+    WaitingForReview: 'İnceleme Bekliyor',
+    WaitingForCompletedWithNoApproval: 'Onaysız Tamamlama Bekliyor',
+    Cancelled: 'İptal',
+    CompletedAnnotationManuel: 'Manuel Ek Açıklama Tam.'
+  };
+  private static REPORT_STATES_EN: string[] = [
+    'Review','Approval','Completed','CompletedWithNoApproval','Annotation',
+    'AnnotationReportApproval','AnnotationReportReview','CompletedWithAnnotationApproval',
+    'WaitingForReview','WaitingForCompletedWithNoApproval','Cancelled','CompletedAnnotationManuel'
+  ];
 
   /* ---- Slicer seçimleri ---- */
   selectedCityIds: any[] = [];
@@ -79,11 +76,15 @@ private static REPORT_STATES_EN: string[] = [
   /* ---- Satır alanları ---- */
   public rowSelected = { Issuer: false, City: true, Hospital: false };
 
+  /* ---- Ölçü görünürlükleri ---- */
+  public showCount = true;
+  public showDistinct = true;
+
   /* ---- Filtre panel bayrakları ---- */
   openCity = false; openHospital = false; openIssuer = false;
   openDiagnosis = false; openState = false; openDecision = false;
 
-  /* ================== SEARCH STATE ================== */
+  /* ---- Search state ---- */
   citySearch = '';
   hospitalSearch = '';
   diagnosisSearch = '';
@@ -91,7 +92,7 @@ private static REPORT_STATES_EN: string[] = [
   stateSearch = '';
 
   /* ================== INIT ================== */
- ngOnInit(): void {
+  ngOnInit(): void {
     this.initDefaultDates();
 
     forkJoin([
@@ -107,25 +108,26 @@ private static REPORT_STATES_EN: string[] = [
         this.diagnoses  = diagnoses  || [];
         this.decisions  = decisions  || [];
         this.stateNames = states     || [];
+        // fallback
+        if (!this.stateNames?.length) {
+          this.stateNames = LinechartComponent.REPORT_STATES_EN.slice();
+        }
         this.onFetch();
       },
-      function(err){ console.error('Lookup load failed', err); }
+      err => { console.error('Lookup load failed', err); }
     );
-
-     this.stateNames =  LinechartComponent.REPORT_STATES_EN.slice();
-     this.onFetch();
-
   }
-  
+
   trState(k: string){ return LinechartComponent.REPORT_STATE_TR[k] || k || ''; }
+
   /* ================== DATE HELPERS ================== */
   private pad2(n:number){ return n<10 ? '0'+n : ''+n; }
   private toInputDate(d: Date){
     return d.getFullYear() + '-' + this.pad2(d.getMonth()+1) + '-' + this.pad2(d.getDate());
   }
   private initDefaultDates(){
-    var end = new Date();
-    var start = new Date(end.getTime() - 30*86400000);
+    const end = new Date();
+    const start = new Date(end.getTime() - 30*86400000);
     this.startDateStr = this.toInputDate(start);
     this.endDateStr   = this.toInputDate(end);
   }
@@ -140,9 +142,7 @@ private static REPORT_STATES_EN: string[] = [
 
     this.api.getFact(this.datetimeInput).subscribe(
       (rows: any[]) => {
-        const data = (rows || []).map(function(r: any){
-          return { ...r, created: new Date(r.createdDate as string) };
-        });
+        const data = (rows || []).map(r => ({ ...r, created: new Date(r.createdDate as string) }));
         this.factAll = data;
         this.factActive = data.slice();
         this.updatePivot();
@@ -160,88 +160,47 @@ private static REPORT_STATES_EN: string[] = [
 
   /* ================== UI HELPERS ================== */
   hospitalsForUI(): HospitalDto[] {
-    if (!this.selectedCityIds.length) {
-      return this.hospitals;
-    }
+    if (!this.selectedCityIds.length) return this.hospitals;
     const s = new Set(this.selectedCityIds.map(String));
     return this.hospitals.filter(h => s.has(String(h.cityId)));
   }
-
   hospitalsForUIFiltered(): HospitalDto[] {
     const base = this.hospitalsForUI();
     if (!this.hospitalSearch) return base;
     return base.filter(h => this._match(this.hospitalSearch, h.name));
   }
-
   citiesFiltered(): CityDto[] {
     if (!this.citySearch) return this.cities;
     return this.cities.filter(c => this._match(this.citySearch, c.name));
   }
-
   diagnosesFiltered(): DiagnosisDto[] {
     if (!this.diagnosisSearch) return this.diagnoses;
     return this.diagnoses.filter(d => this._match(this.diagnosisSearch, d.name));
   }
-
   decisionsFiltered(): HCDecisionDto[] {
     if (!this.decisionSearch) return this.decisions;
     return this.decisions.filter(k =>
       this._match(this.decisionSearch, k.name) || this._match(this.decisionSearch, k.code)
     );
   }
-
- statesFiltered(): string[] {
-
-  if (!this.stateSearch) return this.stateNames;
-
-  const q = this.stateSearch;
-
-  return this.stateNames.filter(s =>
-
-    this._match(q, s) || this._match(q, this.trState(s))
-
-  );
-
-
-}
-
+  statesFiltered(): string[] {
+    if (!this.stateSearch) return this.stateNames;
+    const q = this.stateSearch;
+    return this.stateNames.filter(s => this._match(q, s) || this._match(q, this.trState(s)));
+  }
   isSelected(arr: any[], id: any){ return arr.indexOf(id) !== -1; }
-
   private toggleIn<T>(arr: T[], v: T): T[] {
     const i = arr.indexOf(v);
     return i >= 0 ? (arr.filter(x => x !== v) as any) : arr.concat(v);
   }
 
   /* ================== TOGGLES ================== */
-  toggleCity(id: any) {
-    this.selectedCityIds = this.toggleIn(this.selectedCityIds, id);
-    this.applyFilters();
-  }
-
-  toggleHospital(id: any) {
-    this.selectedHospitalIds = this.toggleIn(this.selectedHospitalIds, id);
-    this.applyFilters();
-  }
-
-  toggleDiagnosis(id: any) {
-    this.selectedDiagnosisIds = this.toggleIn(this.selectedDiagnosisIds, id);
-    this.applyFilters();
-  }
-
-  toggleDecision(id: any) {
-    this.selectedDecisionIds = this.toggleIn(this.selectedDecisionIds, id);
-    this.applyFilters();
-  }
-
-  toggleState(name: string) {
-    this.selectedStates = this.toggleIn(this.selectedStates, name);
-    this.applyFilters();
-  }
-
-  toggleIssuer(name: Issuer) {
-    this.selectedIssuers = this.toggleIn(this.selectedIssuers, name);
-    this.applyFilters();
-  }
+  toggleCity(id: any)      { this.selectedCityIds      = this.toggleIn(this.selectedCityIds, id);       this.applyFilters(); }
+  toggleHospital(id: any)  { this.selectedHospitalIds  = this.toggleIn(this.selectedHospitalIds, id);   this.applyFilters(); }
+  toggleDiagnosis(id: any) { this.selectedDiagnosisIds = this.toggleIn(this.selectedDiagnosisIds, id);  this.applyFilters(); }
+  toggleDecision(id: any)  { this.selectedDecisionIds  = this.toggleIn(this.selectedDecisionIds, id);   this.applyFilters(); }
+  toggleState(name: string){ this.selectedStates       = this.toggleIn(this.selectedStates, name);      this.applyFilters(); }
+  toggleIssuer(name: Issuer){ this.selectedIssuers     = this.toggleIn(this.selectedIssuers, name);     this.applyFilters(); }
 
   /* ================== PANEL AÇ/KAPA ================== */
   openOnlyRegion(which: 'City' | 'Hospital' | 'Issuer') {
@@ -249,7 +208,6 @@ private static REPORT_STATES_EN: string[] = [
     this.openHospital = (which === 'Hospital') ? !this.openHospital : false;
     this.openIssuer   = (which === 'Issuer')   ? !this.openIssuer   : false;
   }
-
   openOnlyCriteria(which: 'Diagnosis' | 'ReportState' | 'Decision') {
     this.openDiagnosis = (which === 'Diagnosis')   ? !this.openDiagnosis : false;
     this.openState     = (which === 'ReportState') ? !this.openState     : false;
@@ -259,13 +217,9 @@ private static REPORT_STATES_EN: string[] = [
   /* ================== ROW TOGGLE ================== */
   public toggleRow(kind: 'Issuer' | 'City' | 'Hospital') {
     (this.rowSelected as any)[kind] = !(this.rowSelected as any)[kind];
-
-    if (!this.rowSelected.Issuer &&
-        !this.rowSelected.City &&
-        !this.rowSelected.Hospital) {
+    if (!this.rowSelected.Issuer && !this.rowSelected.City && !this.rowSelected.Hospital) {
       (this.rowSelected as any)[kind] = true;
     }
-
     this.openOnlyRegion(kind);
     this.updatePivot();
   }
@@ -289,53 +243,93 @@ private static REPORT_STATES_EN: string[] = [
     // Sütun alanları (kriterler)
     for (let i = 0; i < this.columnOrder.length; i++) {
       const k = this.columnOrder[i];
-      if (k === 'Diagnosis') {  
-      fields.push({ dataField: 'diagnosisCode', caption: 'Tanı (Kod)', area: 'column' });
+      if (k === 'Diagnosis') {
+        fields.push({ dataField: 'diagnosisCode', caption: 'Tanı (Kod)', area: 'column' });
       } else if (k === 'ReportState') {
         fields.push({
-
-        dataField: 'reportStateName',   // EN anahtar ile gelir
-
-        caption: 'Rapor Durumu',
-
-        area: 'column',
-
-        customizeText: (cellInfo: any) => {
-
-          const raw = (cellInfo && (cellInfo.valueText || cellInfo.text || cellInfo.value)) || '';
-
-          return this.trState(String(raw)); // ekranda TR göster
-
-        }});
+          dataField: 'reportStateName',
+          caption: 'Rapor Durumu',
+          area: 'column',
+          customizeText: (cellInfo: any) => {
+            const raw = (cellInfo && (cellInfo.valueText || cellInfo.text || cellInfo.value)) || '';
+            return this.trState(String(raw));
+          }
+        });
       } else {
         fields.push({ dataField: 'decisionName', caption: 'Karar', area: 'column' });
       }
     }
 
-    // Veri alanları
-    fields.push({ caption: 'Rapor (count)', area: 'data', dataField: 'reportId', summaryType: 'count' });
+    // ---- Veri alanları ----
+    // 1) Rapor (count) = flat satır sayısı (rapor×tanı)
+    fields.push({
+      name: 'cntRows',
+      caption: 'Rapor (count)',
+      area: 'data',
+      dataField: 'reportId',
+      summaryType: 'count',
+      visible: this.showCount
+    });
 
+    // 2) Rapor (distinct) = tekil rapor sayısı
+    // dataField: 'reportId' => options.value = reportId
+    fields.push({
+      name: 'cntDistinctReports',
+      caption: 'Rapor (distinct)',
+      area: 'data',
+      dataField: 'reportId',
+      summaryType: 'custom',
+      calculateCustomSummary: (o:any) => this.calcDistinctReport(o),
+      visible: this.showDistinct
+    });
+
+    // 3) Oran (count üstünden %)
     const mode = this.percentBasis === 'row'
       ? 'percentOfRowTotal'
       : (this.percentBasis === 'column' ? 'percentOfColumnTotal' : 'percentOfGrandTotal');
 
     fields.push({
-      caption: 'Oran',
+      name: 'ratioOnCount',
+      caption: 'Oran (count)',
       area: 'data',
       dataField: 'reportId',
       summaryType: 'count',
       summaryDisplayMode: mode,
-      format: { type: 'percent', precision: 2 }
+      format: { type: 'percent', precision: 2 },
+      visible: true
     });
 
     return fields;
+  }
+
+  private calcDistinctReport(o:any){
+    if (o.summaryProcess === 'start') {
+      o._set = new Set<string>();
+    } else if (o.summaryProcess === 'calculate') {
+      // o.value: dataField'in değeri => reportId
+      if (o.value != null) o._set.add(String(o.value));
+    } else if (o.summaryProcess === 'finalize') {
+      o.totalValue = o._set.size;
+    }
   }
 
   public updatePivot(): void {
     if (!this.factActive.length){ this.pivotDs=null; return; }
     this.pivotDs = new PivotGridDataSource({ fields: this.buildFields(), store: this.factActive });
     const self = this;
-    setTimeout(function(){ self.applyFilters(); });
+    setTimeout(function(){
+      // alanların görünürlüklerini UI flag'lerine göre sağlam al
+      self.toggleMeasure('cntRows', self.showCount, false);
+      self.toggleMeasure('cntDistinctReports', self.showDistinct, false);
+      self.applyFilters();
+    });
+  }
+
+  /** Ölçü görünürlüğünü değiştirir */
+  public toggleMeasure(name: 'cntRows'|'cntDistinctReports', on: boolean, reload: boolean = true){
+    if (!this.pivotDs) return;
+    this.pivotDs.field(name, { visible: on });
+    if (reload) this.pivotDs.reload();
   }
 
   private buildNameMap(list: { id?: any; name?: any }[]): Map<string, string> {
@@ -346,23 +340,22 @@ private static REPORT_STATES_EN: string[] = [
     }
     return m;
   }
-
   private buildCodeMap<T extends { id?: any }>(list: T[], prop: keyof T): Map<string, any> {
-  const m = new Map<string, any>();
-  for (let i = 0; i < list.length; i++) {
-    const x: any = list[i];
-    if (x && x.id != null && x[prop] != null) m.set(String(x.id), x[prop]);
+    const m = new Map<string, any>();
+    for (let i = 0; i < list.length; i++) {
+      const x: any = list[i];
+      if (x && x.id != null && x[prop] != null) m.set(String(x.id), x[prop]);
+    }
+    return m;
   }
-  return m;
-}
 
   private applyFilters(): void {
     if (!this.pivotDs) return;
 
-    const cityMap = this.buildNameMap(this.cities);
-    const hospMap = this.buildNameMap(this.hospitals);
-    const diagCodeMap = this.buildCodeMap(this.diagnoses, 'code');  
-    const decMap  = this.buildNameMap(this.decisions);
+    const cityMap     = this.buildNameMap(this.cities);
+    const hospMap     = this.buildNameMap(this.hospitals);
+    const diagCodeMap = this.buildCodeMap(this.diagnoses, 'code');
+    const decMap      = this.buildNameMap(this.decisions);
 
     function namesFrom(ids: any[], m: Map<string,string>) {
       const out: string[] = [];
@@ -372,7 +365,6 @@ private static REPORT_STATES_EN: string[] = [
       }
       return out;
     }
-    
 
     this.pivotDs.field('issuer', {
       filterType: this.selectedIssuers.length ? 'include' : undefined,

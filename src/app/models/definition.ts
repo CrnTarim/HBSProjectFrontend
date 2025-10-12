@@ -25,6 +25,7 @@ export class HCDecisionDto {
   bakanlikOnay: 0 | 1 = 0;
 }
 
+/** Artık her satırda bir tanı olacağı garanti: tanı alanlarını zorunlu yaptık */
 export class FactReport {
   reportId: string = '';
   reportCode: number = 0;
@@ -40,21 +41,23 @@ export class FactReport {
   hospitalId: string = '';
   hospitalCode: number = 0;
   hospitalName: string = '';
+
   provisionId: string = '';
   provisionCode: string = '';
 
-  diagnosisId: string | null = null;
-  diagnosisCode: string | null = null;
-  diagnosisName: string | null = null;
+  diagnosisId: string = '';
+  diagnosisCode: string = '';
+  diagnosisName: string = '';
 
-  decisionId: string | null = null;
-  decisionCode: number | null = null;
-  decisionName: string | null = null;
+  decisionId: string = '';
+  decisionCode: string = '';
+  decisionName: string = '';
 
+  /** API’de hesaplanan alan */
   issuer: 'MB' | 'PTM' | 'BH' = 'BH';
 }
-// models/datetime-input.model.ts
+
 export interface DatetimeInput {
-  StartDate: string; 
+  StartDate: string;
   EndDate: string;
 }

@@ -201,45 +201,61 @@
       </div>
     </div>
 
-    <!-- Yüzde ekseni -->
-    <div class="block">
-      <div class="label">Yüzde Ekseni</div>
-      <div class="pills">
-        <button [class.on]="percentBasis==='row'"    (click)="percentBasis='row';    updatePivot()">% Satır</button>
-        <button [class.on]="percentBasis==='column'" (click)="percentBasis='column'; updatePivot()">% Sütun</button>
-        <button [class.on]="percentBasis==='grand'"  (click)="percentBasis='grand';  updatePivot()">% Genel</button>
-      </div>
+    <!-- ... yukarıdaki içerik aynı ... -->
+
+<!-- Yüzde ekseni -->
+<div class="block">
+  <div class="label">Yüzde Ekseni</div>
+  <div class="pills">
+    <button [class.on]="percentBasis==='row'"    (click)="percentBasis='row';    updatePivot()">% Satır</button>
+    <button [class.on]="percentBasis==='column'" (click)="percentBasis='column'; updatePivot()">% Sütun</button>
+    <button [class.on]="percentBasis==='grand'"  (click)="percentBasis='grand';  updatePivot()">% Genel</button>
+  </div>
+</div>
+
+<!-- >>> BURAYI YENİ EKLE -->
+<div class="block">
+  <div class="label">Ölçüler</div>
+  <label>
+    <input type="checkbox" [(ngModel)]="showCount" (change)="toggleMeasure('cntRows', showCount)">
+    <span>Rapor (count)</span>
+  </label>
+  <label style="margin-left:16px;">
+    <input type="checkbox" [(ngModel)]="showDistinct" (change)="toggleMeasure('cntDistinctReports', showDistinct)">
+    <span>Rapor (distinct)</span>
+  </label>
+</div>
+<!-- <<< BURAYI YENİ EKLE -->
+
+<!-- 3) Pivot -->
+<div class="card section">
+  <div class="section-headline" style="justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="badge">3</div><h3>Sonuçlar</h3>
     </div>
   </div>
 
-  <!-- 3) Pivot -->
-  <div class="card section">
-    <div class="section-headline" style="justify-content:space-between;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div class="badge">3</div><h3>Sonuçlar</h3>
-      </div>
-    </div>
+  <div *ngIf="!factActive.length" class="hint">Tarih seçip <b>Hesapla</b>’ya basın.</div>
 
-    <div *ngIf="!factActive.length" class="hint">Tarih seçip <b>Hesapla</b>’ya basın.</div>
-
-    <div class="pivot" *ngIf="factActive.length">
-      <dx-pivot-grid
-        [dataSource]="pivotDs"
-        [allowSortingBySummary]="true"
-        [allowFiltering]="true"
-        [showBorders]="true"
-        [showColumnTotals]="true"
-        [showRowTotals]="true"
-        [showColumnGrandTotals]="true"
-        [showRowGrandTotals]="true"
-        [fieldPanel]="{
-          visible: true,
-          showFilterFields: true,
-          showRowFields: true,
-          showColumnFields: true,
-          showDataFields: true
-        }">
-      </dx-pivot-grid>
-    </div>
+  <div class="pivot" *ngIf="factActive.length">
+    <dx-pivot-grid
+      [dataSource]="pivotDs"
+      [allowSortingBySummary]="true"
+      [allowFiltering]="true"
+      [showBorders]="true"
+      [showColumnTotals]="true"
+      [showRowTotals]="true"
+      [showColumnGrandTotals]="true"
+      [showRowGrandTotals]="true"
+      [fieldPanel]="{
+        visible: true,
+        showFilterFields: true,
+        showRowFields: true,
+        showColumnFields: true,
+        showDataFields: true
+      }">
+    </dx-pivot-grid>
   </div>
+</div>
+
 </div>
