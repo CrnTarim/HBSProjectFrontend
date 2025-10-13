@@ -1,4 +1,4 @@
-import { DatetimeInput } from './../models/definition';
+import { DatetimeInput, ForceDto, RankDto } from './../models/definition';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -29,6 +29,14 @@ export class DefinitionService {
   }
   getReportStates(): Observable<string[]> {
     return this.http.get<string[]>(`${this.url}/reportstates`);
+  }
+
+  getRanks(): Observable<RankDto[]> {
+    return this.http.get<RankDto[]>(`${this.url}/rank`);
+  }
+
+  getForces(): Observable<ForceDto[]> {
+    return this.http.get<ForceDto[]>(`${this.url}/force`);
   }
 
   issuerOf(dec: HCDecisionDto): 'MB' | 'PTM' | 'BH' {

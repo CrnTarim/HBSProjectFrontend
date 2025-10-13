@@ -17,6 +17,19 @@ export class DiagnosisDto {
   name: string = '';
 }
 
+
+export class RankDto {
+  id: string = '';
+  code: string = '';
+  name: string = '';
+}
+
+export class ForceDto {
+  id: string = '';
+  code: string = '';
+  name: string = '';
+}
+
 export class HCDecisionDto {
   id: string = '';
   code: number = 0;
@@ -44,6 +57,14 @@ export class FactReport {
 
   provisionId: string = '';
   provisionCode: string = '';
+
+  forceId: string = '';
+  forceCode: string = '';
+  forceName: string = '';
+
+  rankId: string = '';
+  rankCode: string = '';
+  rankName: string = '';
 
   diagnosisId: string = '';
   diagnosisCode: string = '';

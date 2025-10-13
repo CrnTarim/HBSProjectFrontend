@@ -35,6 +35,8 @@
       <div class="label">Bölge</div>
       <div class="pills">
         <button [class.on]="rowSelected.Issuer"   (click)="toggleRow('Issuer')">Onaylayan</button>
+        <button [class.on]="rowSelected.Force"   (click)="toggleRow('Force')">Kuvvet</button>
+        <button [class.on]="rowSelected.Rank"   (click)="toggleRow('Rank')">Rütbe</button>
         <button [class.on]="rowSelected.City"     (click)="toggleRow('City')">Şehir</button>
         <button [class.on]="rowSelected.Hospital" (click)="toggleRow('Hospital')">Hastane</button>
       </div>
@@ -88,6 +90,55 @@
             <div class="hint">İpucu: Şehir seçmek listeyi daraltır.</div>
           </div>
         </div>
+
+        <div>
+          <div class="section-toggle" (click)="openOnlyRegion('Force')">
+            <span>Kuvvet filtresi</span>
+            <span class="chev" [class.open]="openForce">▾</span>
+          </div>
+          <div class="collapsible" [class.open]="openForce">
+
+            <!-- Arama -->
+            <input type="text" placeholder="Hastane ara..." [(ngModel)]="forceSearch" class="searchbox">
+
+            <div class="multi">
+              <div class="options">
+                <label *ngFor="let h of forcesForUIFiltered()">
+                  <input type="checkbox" [checked]="isSelected(selectedForceIds, h.id)" (change)="toggleForce(h.id)">
+                  <span class="text">{{ h.name }}</span>
+                </label>
+              </div>
+            </div>
+            <div class="hint">İpucu: Şehir seçmek listeyi daraltır.</div>
+          </div>
+        </div>
+
+
+        <div>
+          <div class="section-toggle" (click)="openOnlyRegion('Rank')">
+            <span>Rütbe filtresi</span>
+            <span class="chev" [class.open]="openRank">▾</span>
+          </div>
+          <div class="collapsible" [class.open]="openRank">
+
+            <!-- Arama -->
+            <input type="text" placeholder="Hastane ara..." [(ngModel)]="rankSearch" class="searchbox">
+
+            <div class="multi">
+              <div class="options">
+                <label *ngFor="let h of ranksForUIFiltered()">
+                  <input type="checkbox" [checked]="isSelected(selectedRankIds, h.id)" (change)="toggleRank(h.id)">
+                  <span class="text">{{ h.name }}</span>
+                </label>
+              </div>
+            </div>
+            <div class="hint">İpucu: Şehir seçmek listeyi daraltır.</div>
+          </div>
+        </div>
+
+
+
+
 
         <!-- Onaylayan -->
         <div>

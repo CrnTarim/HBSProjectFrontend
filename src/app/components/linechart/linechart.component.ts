@@ -4,7 +4,9 @@ import { forkJoin } from 'rxjs';
 import { DefinitionService } from '../../services/definition.service';
 import {
   CityDto, HospitalDto, DiagnosisDto, HCDecisionDto, FactReport,
-  DatetimeInput
+  DatetimeInput,
+  RankDto,
+  ForceDto
 } from '../../models/definition';
 
 type Issuer = 'MB' | 'PTM' | 'BH';
@@ -33,7 +35,12 @@ export class LinechartComponent implements OnInit {
   hospitals: HospitalDto[] = [];
   diagnoses: DiagnosisDto[] = [];
   decisions: HCDecisionDto[] = [];
+  ranks:RankDto[]=[];
+  forces:ForceDto[]=[];
   stateNames: string[] = [];
+
+
+
   private static REPORT_STATE_TR: { [k: string]: string } = {
     Review: 'İncelemede',
     Approval: 'Onayda',
@@ -62,6 +69,8 @@ export class LinechartComponent implements OnInit {
   selectedStates: string[] = [];
   issuers: Issuer[] = ['MB','PTM','BH'];
   selectedIssuers: Issuer[] = [];
+  selectedRankIds: string[] = [];
+  selectedForceIds: string[] = [];
 
   /* ---- Veri ---- */
   private factAll: (FactReport & { created: Date })[] = [];
@@ -74,15 +83,21 @@ export class LinechartComponent implements OnInit {
   columnOrder: ColumnKey[] = [];
 
   /* ---- Satır alanları ---- */
-  public rowSelected = { Issuer: false, City: true, Hospital: false };
+  public rowSelected = { Issuer: false, City: true, Hospital: false ,Rank:false,Force:false};
 
   /* ---- Ölçü görünürlükleri ---- */
   public showCount = true;
   public showDistinct = true;
 
   /* ---- Filtre panel bayrakları ---- */
-  openCity = false; openHospital = false; openIssuer = false;
-  openDiagnosis = false; openState = false; openDecision = false;
+  openCity = false; 
+  openHospital = false; 
+  openIssuer = false;
+  openDiagnosis = false; 
+  openState = false; 
+  openDecision = false;
+  openRank=false;
+  openForce=false
 
   /* ---- Search state ---- */
   citySearch = '';
@@ -90,6 +105,8 @@ export class LinechartComponent implements OnInit {
   diagnosisSearch = '';
   decisionSearch = '';
   stateSearch = '';
+  rankSearch='';
+  forceSearch='';
 
   /* ================== INIT ================== */
   ngOnInit(): void {
@@ -100,14 +117,18 @@ export class LinechartComponent implements OnInit {
       this.api.getHospitals(),
       this.api.getDiagnoses(),
       this.api.getDecisions(),
-      this.api.getReportStates()
+      this.api.getReportStates(),
+      this.api.getRanks(),
+      this.api.getForces()
     ]).subscribe(
-      ([cities, hospitals, diagnoses, decisions, states]) => {
+      ([cities, hospitals, diagnoses, decisions, states,ranks,forces]) => {
         this.cities     = cities     || [];
         this.hospitals  = hospitals  || [];
         this.diagnoses  = diagnoses  || [];
         this.decisions  = decisions  || [];
         this.stateNames = states     || [];
+        this.ranks =ranks|| [];
+        this.forces = forces || [];
         // fallback
         if (!this.stateNames?.length) {
           this.stateNames = LinechartComponent.REPORT_STATES_EN.slice();
@@ -173,6 +194,17 @@ export class LinechartComponent implements OnInit {
     if (!this.citySearch) return this.cities;
     return this.cities.filter(c => this._match(this.citySearch, c.name));
   }
+
+   ranksForUIFiltered(): RankDto[] {
+    if (!this.rankSearch) return this.ranks;
+    return this.ranks.filter(c => this._match(this.rankSearch, c.name));
+  }
+
+     forcesForUIFiltered(): ForceDto[] {
+    if (!this.forceSearch) return this.forces;
+    return this.forces.filter(c => this._match(this.forceSearch, c.name));
+  }
+
   diagnosesFiltered(): DiagnosisDto[] {
     if (!this.diagnosisSearch) return this.diagnoses;
     return this.diagnoses.filter(d => this._match(this.diagnosisSearch, d.name));
@@ -201,12 +233,16 @@ export class LinechartComponent implements OnInit {
   toggleDecision(id: any)  { this.selectedDecisionIds  = this.toggleIn(this.selectedDecisionIds, id);   this.applyFilters(); }
   toggleState(name: string){ this.selectedStates       = this.toggleIn(this.selectedStates, name);      this.applyFilters(); }
   toggleIssuer(name: Issuer){ this.selectedIssuers     = this.toggleIn(this.selectedIssuers, name);     this.applyFilters(); }
+  toggleRank(id: any)      { this.selectedRankIds      = this.toggleIn(this.selectedRankIds, id);       this.applyFilters(); }
+  toggleForce(id: any)      { this.selectedForceIds      = this.toggleIn(this.selectedForceIds, id);    this.applyFilters(); }
 
   /* ================== PANEL AÇ/KAPA ================== */
-  openOnlyRegion(which: 'City' | 'Hospital' | 'Issuer') {
+  openOnlyRegion(which: 'City' | 'Hospital' | 'Issuer' | 'Rank' |'Force') {
     this.openCity     = (which === 'City')     ? !this.openCity     : false;
     this.openHospital = (which === 'Hospital') ? !this.openHospital : false;
     this.openIssuer   = (which === 'Issuer')   ? !this.openIssuer   : false;
+    this.openRank  = (which === 'Rank')   ? !this.openRank  : false;
+    this.openForce  = (which === 'Force')   ? !this.openForce  : false;
   }
   openOnlyCriteria(which: 'Diagnosis' | 'ReportState' | 'Decision') {
     this.openDiagnosis = (which === 'Diagnosis')   ? !this.openDiagnosis : false;
@@ -215,9 +251,12 @@ export class LinechartComponent implements OnInit {
   }
 
   /* ================== ROW TOGGLE ================== */
-  public toggleRow(kind: 'Issuer' | 'City' | 'Hospital') {
+  public toggleRow(kind: 'Issuer' | 'City' | 'Hospital'| 'Rank' |'Force') {
     (this.rowSelected as any)[kind] = !(this.rowSelected as any)[kind];
-    if (!this.rowSelected.Issuer && !this.rowSelected.City && !this.rowSelected.Hospital) {
+    if (!this.rowSelected.Issuer && 
+      !this.rowSelected.City && 
+      !this.rowSelected.Hospital&& 
+      !this.rowSelected.Force) {
       (this.rowSelected as any)[kind] = true;
     }
     this.openOnlyRegion(kind);
@@ -233,6 +272,14 @@ export class LinechartComponent implements OnInit {
     if (this.rowSelected.Issuer) { issuer.area = 'row'; }
     fields.push(issuer);
 
+    if (this.rowSelected.Force) {
+      fields.push({ dataField: 'forceName', caption: 'Kuvvet', area: 'row' });
+    }
+
+     if (this.rowSelected.Rank) {
+      fields.push({ dataField: 'rankName', caption: 'Rütbe', area: 'row' });
+    }
+
     if (this.rowSelected.City) {
       fields.push({ dataField: 'cityName', caption: 'Şehir', area: 'row' });
     }
@@ -244,7 +291,11 @@ export class LinechartComponent implements OnInit {
     for (let i = 0; i < this.columnOrder.length; i++) {
       const k = this.columnOrder[i];
       if (k === 'Diagnosis') {
-        fields.push({ dataField: 'diagnosisCode', caption: 'Tanı (Kod)', area: 'column' });
+        fields.push({ 
+          dataField: 'diagnosisCode', 
+          caption: 'Tanı (Kod)',
+          area: 'column' 
+        });
       } else if (k === 'ReportState') {
         fields.push({
           dataField: 'reportStateName',
@@ -407,3 +458,5 @@ export class LinechartComponent implements OnInit {
     return i >= 0 ? i+1 : null;
   }
 }
+
+
