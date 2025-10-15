@@ -1,27 +1,78 @@
-# MushicshopUI
+[HttpPost("stats/fact")]
+public async Task<IActionResult> GetFact([FromBody] Datetimeinput dt)
+{
+    var start = dt.StartDate.Date;
+    var endEx = dt.EndDate.Date.AddDays(1);   // < endEx önemli
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.3.
+    // 1) Rapor×Tanı TEKİL
+    var rpDx =
+        _ctx.ReportDiagnoses.AsNoTracking()
+            .Select(x => new { x.ReportId, x.DiagnosisId })
+            .Distinct();
 
-## Development server
+    // 2) Her rapor için EN SON karar (EF için güvenli desen)
+    var rdMax =
+        from rd in _ctx.ReportDecisions.AsNoTracking()
+        group rd by rd.ReportId into g
+        select new { ReportId = g.Key, MaxCreated = g.Max(x => x.CreatedDate) };
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+    // 3) Flat set (karar tekilleştirildi, tanı tekilleştirildi)
+    var q =
+        from r in _ctx.Reports.AsNoTracking()
+        where r.CreatedDate >= start && r.CreatedDate < endEx
+        join p in _ctx.Provisions.AsNoTracking() on r.ProvisionId equals p.Id
+        join h in _ctx.Hospitals.AsNoTracking() on p.HospitalId equals h.Id
+        join c in _ctx.Cities.AsNoTracking()    on h.CityId     equals c.Id
 
-## Code scaffolding
+        // Provision -> Dispatch (LEFT)
+        join d0 in _ctx.Dispatch.AsNoTracking() on p.DispatchId equals d0.Id into dg
+        from d in dg.DefaultIfEmpty()
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+        // Dispatch -> Force/Rank (LEFT)
+        join f0 in _ctx.Forces.AsNoTracking() on d.ForceId equals f0.Id into fg
+        from f in fg.DefaultIfEmpty()
+        join rk0 in _ctx.Ranks.AsNoTracking() on d.RankId equals rk0.Id into rkg
+        from rk in rkg.DefaultIfEmpty()
 
-## Build
+        // En son karar (LEFT)
+        join m in rdMax on r.Id equals m.ReportId into mg
+        from mx in mg.DefaultIfEmpty()
+        join rd1 in _ctx.ReportDecisions.AsNoTracking()
+             on new { ReportId = r.Id, Created = mx.MaxCreated }
+             equals new { ReportId = rd1.ReportId, Created = (DateTime?)rd1.CreatedDate } into rdg
+        from rd in rdg.DefaultIfEmpty()
+        join hcd0 in _ctx.HCDecisions.AsNoTracking() on rd.DecisionId equals hcd0.Id into hcdg
+        from hcd in hcdg.DefaultIfEmpty()
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+        // Tanı: TEKİL rapor×tanı seti
+        join pair in rpDx on r.Id equals pair.ReportId
+        join dx in _ctx.Diagnoses.AsNoTracking() on pair.DiagnosisId equals dx.Id
 
-## Running unit tests
+        select new
+        {
+            reportId = r.Id,
+            reportCode = r.Code,
+            createdDate = r.CreatedDate,
+            reportState = (int)r.State,
+            reportStateName = r.State.ToString(),
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+            cityId = c.Id, cityCode = c.CityCode, cityName = c.CityName,
+            hospitalId = h.Id, hospitalCode = h.Code, hospitalName = h.Name,
+            provisionId = p.Id, provisionCode = p.Code.ToString(),
 
-## Running end-to-end tests
+            dispatchId = (Guid?)d.Id,
+            forceId = (Guid?)f.Id, forceCode = (int?)f.Code, forceName = f.Name,
+            rankId = (Guid?)rk.Id, rankCode = (int?)rk.Code, rankName = rk.Name,
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+            diagnosisId = dx.Id, diagnosisCode = dx.Code, diagnosisName = dx.Name,
 
-## Further help
+            decisionId = (Guid?)hcd?.Id,
+            decisionCode = (int?)hcd?.Code,
+            decisionName = hcd?.Name,
+            issuer = hcd == null ? "BH"
+                    : (hcd.BakanlikOnay == 1 ? "MB"
+                    : (hcd.TeminOnay == 1 ? "PTM" : "BH"))
+        };
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+    return Ok(await q.ToListAsync());
+}
