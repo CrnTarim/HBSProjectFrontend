@@ -35,8 +35,8 @@
       <div class="label">Bölge</div>
       <div class="pills">
         <button [class.on]="rowSelected.Issuer"   (click)="toggleRow('Issuer')">Onaylayan</button>
-        <button [class.on]="rowSelected.Force"   (click)="toggleRow('Force')">Kuvvet</button>
-        <button [class.on]="rowSelected.Rank"   (click)="toggleRow('Rank')">Rütbe</button>
+        <button [class.on]="rowSelected.Force"    (click)="toggleRow('Force')">Kuvvet</button>
+        <button [class.on]="rowSelected.Rank"     (click)="toggleRow('Rank')">Rütbe</button>
         <button [class.on]="rowSelected.City"     (click)="toggleRow('City')">Şehir</button>
         <button [class.on]="rowSelected.Hospital" (click)="toggleRow('Hospital')">Hastane</button>
       </div>
@@ -53,10 +53,7 @@
             <span class="chev" [class.open]="openCity">▾</span>
           </div>
           <div class="collapsible" [class.open]="openCity">
-
-            <!-- Arama -->
             <input type="text" placeholder="Şehir ara..." [(ngModel)]="citySearch" class="searchbox">
-
             <div class="multi">
               <div class="options">
                 <label *ngFor="let c of citiesFiltered()">
@@ -75,10 +72,7 @@
             <span class="chev" [class.open]="openHospital">▾</span>
           </div>
           <div class="collapsible" [class.open]="openHospital">
-
-            <!-- Arama -->
             <input type="text" placeholder="Hastane ara..." [(ngModel)]="hospitalSearch" class="searchbox">
-
             <div class="multi">
               <div class="options">
                 <label *ngFor="let h of hospitalsForUIFiltered()">
@@ -91,54 +85,43 @@
           </div>
         </div>
 
+        <!-- Kuvvet -->
         <div>
           <div class="section-toggle" (click)="openOnlyRegion('Force')">
             <span>Kuvvet filtresi</span>
             <span class="chev" [class.open]="openForce">▾</span>
           </div>
           <div class="collapsible" [class.open]="openForce">
-
-            <!-- Arama -->
-            <input type="text" placeholder="Hastane ara..." [(ngModel)]="forceSearch" class="searchbox">
-
+            <input type="text" placeholder="Kuvvet ara..." [(ngModel)]="forceSearch" class="searchbox">
             <div class="multi">
               <div class="options">
-                <label *ngFor="let h of forcesForUIFiltered()">
-                  <input type="checkbox" [checked]="isSelected(selectedForceIds, h.id)" (change)="toggleForce(h.id)">
-                  <span class="text">{{ h.name }}</span>
+                <label *ngFor="let f of forcesForUIFiltered()">
+                  <input type="checkbox" [checked]="isSelected(selectedForceIds, f.id)" (change)="toggleForce(f.id)">
+                  <span class="text">{{ f.name }}</span>
                 </label>
               </div>
             </div>
-            <div class="hint">İpucu: Şehir seçmek listeyi daraltır.</div>
           </div>
         </div>
 
-
+        <!-- Rütbe -->
         <div>
           <div class="section-toggle" (click)="openOnlyRegion('Rank')">
             <span>Rütbe filtresi</span>
             <span class="chev" [class.open]="openRank">▾</span>
           </div>
           <div class="collapsible" [class.open]="openRank">
-
-            <!-- Arama -->
-            <input type="text" placeholder="Hastane ara..." [(ngModel)]="rankSearch" class="searchbox">
-
+            <input type="text" placeholder="Rütbe ara..." [(ngModel)]="rankSearch" class="searchbox">
             <div class="multi">
               <div class="options">
-                <label *ngFor="let h of ranksForUIFiltered()">
-                  <input type="checkbox" [checked]="isSelected(selectedRankIds, h.id)" (change)="toggleRank(h.id)">
-                  <span class="text">{{ h.name }}</span>
+                <label *ngFor="let r of ranksForUIFiltered()">
+                  <input type="checkbox" [checked]="isSelected(selectedRankIds, r.id)" (change)="toggleRank(r.id)">
+                  <span class="text">{{ r.name }}</span>
                 </label>
               </div>
             </div>
-            <div class="hint">İpucu: Şehir seçmek listeyi daraltır.</div>
           </div>
         </div>
-
-
-
-
 
         <!-- Onaylayan -->
         <div>
@@ -188,10 +171,7 @@
             <span class="chev" [class.open]="openDiagnosis">▾</span>
           </div>
           <div class="collapsible" [class.open]="openDiagnosis">
-
-            <!-- Arama -->
             <input type="text" placeholder="Tanı ara..." [(ngModel)]="diagnosisSearch" class="searchbox">
-
             <div class="multi">
               <div class="options">
                 <label *ngFor="let d of diagnosesFiltered()">
@@ -210,18 +190,13 @@
             <span class="chev" [class.open]="openState">▾</span>
           </div>
           <div class="collapsible" [class.open]="openState">
-
-            <!-- Arama -->
             <input type="text" placeholder="Durum ara..." [(ngModel)]="stateSearch" class="searchbox">
-
             <div class="multi">
               <div class="options">
                 <label *ngFor="let s of statesFiltered()">
-                <input type="checkbox"
-                      [checked]="isSelected(selectedStates, s)"
-                      (change)="toggleState(s)">
-                <span class="text">{{ trState(s) }}</span> <!-- EN yerine TR -->
-              </label>
+                  <input type="checkbox" [checked]="isSelected(selectedStates, s)" (change)="toggleState(s)">
+                  <span class="text">{{ trState(s) }}</span>
+                </label>
               </div>
             </div>
           </div>
@@ -234,10 +209,7 @@
             <span class="chev" [class.open]="openDecision">▾</span>
           </div>
           <div class="collapsible" [class.open]="openDecision">
-
-            <!-- Arama -->
             <input type="text" placeholder="Karar ara (ad/kod)..." [(ngModel)]="decisionSearch" class="searchbox">
-
             <div class="multi decisions">
               <div class="options">
                 <label *ngFor="let k of decisionsFiltered()">
@@ -246,67 +218,63 @@
                 </label>
               </div>
             </div>
-            <div class="hint">İpucu: Onaylayan filtresi üstte.</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ... yukarıdaki içerik aynı ... -->
+    <!-- Yüzde ekseni -->
+    <div class="block">
+      <div class="label">Yüzde Ekseni</div>
+      <div class="pills">
+        <button [class.on]="percentBasis==='row'"    (click)="percentBasis='row';    updatePivot()">% Satır</button>
+        <button [class.on]="percentBasis==='column'" (click)="percentBasis='column'; updatePivot()">% Sütun</button>
+        <button [class.on]="percentBasis==='grand'"  (click)="percentBasis='grand';  updatePivot()">% Genel</button>
+      </div>
+    </div>
 
-<!-- Yüzde ekseni -->
-<div class="block">
-  <div class="label">Yüzde Ekseni</div>
-  <div class="pills">
-    <button [class.on]="percentBasis==='row'"    (click)="percentBasis='row';    updatePivot()">% Satır</button>
-    <button [class.on]="percentBasis==='column'" (click)="percentBasis='column'; updatePivot()">% Sütun</button>
-    <button [class.on]="percentBasis==='grand'"  (click)="percentBasis='grand';  updatePivot()">% Genel</button>
-  </div>
-</div>
-
-<!-- >>> BURAYI YENİ EKLE -->
-<div class="block">
-  <div class="label">Ölçüler</div>
-  <label>
-    <input type="checkbox" [(ngModel)]="showCount" (change)="toggleMeasure('cntRows', showCount)">
-    <span>Rapor (count)</span>
-  </label>
-  <label style="margin-left:16px;">
-    <input type="checkbox" [(ngModel)]="showDistinct" (change)="toggleMeasure('cntDistinctReports', showDistinct)">
-    <span>Rapor (distinct)</span>
-  </label>
-</div>
-<!-- <<< BURAYI YENİ EKLE -->
-
-<!-- 3) Pivot -->
-<div class="card section">
-  <div class="section-headline" style="justify-content:space-between;">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div class="badge">3</div><h3>Sonuçlar</h3>
+    <!-- Ölçüler -->
+    <div class="block">
+      <div class="label">Ölçüler</div>
+      <label>
+        <input type="checkbox" [(ngModel)]="showCount" (change)="toggleMeasure('cntRows', showCount)">
+        <span>Rapor (count)</span>
+      </label>
+      <label style="margin-left:16px;">
+        <input type="checkbox" [(ngModel)]="showDistinct" (change)="toggleMeasure('cntDistinctReports', showDistinct)">
+        <span>Rapor (distinct)</span>
+      </label>
     </div>
   </div>
 
-  <div *ngIf="!factActive.length" class="hint">Tarih seçip <b>Hesapla</b>’ya basın.</div>
+  <!-- 3) Pivot -->
+  <div class="card section">
+    <div class="section-headline" style="justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="badge">3</div><h3>Sonuçlar</h3>
+      </div>
+    </div>
 
-  <div class="pivot" *ngIf="factActive.length">
-    <dx-pivot-grid
-      [dataSource]="pivotDs"
-      [allowSortingBySummary]="true"
-      [allowFiltering]="true"
-      [showBorders]="true"
-      [showColumnTotals]="true"
-      [showRowTotals]="true"
-      [showColumnGrandTotals]="true"
-      [showRowGrandTotals]="true"
-      [fieldPanel]="{
-        visible: true,
-        showFilterFields: true,
-        showRowFields: true,
-        showColumnFields: true,
-        showDataFields: true
-      }">
-    </dx-pivot-grid>
+    <div *ngIf="!factActive.length" class="hint">Tarih seçip <b>Hesapla</b>’ya basın.</div>
+
+    <div class="pivot" *ngIf="factActive.length">
+      <dx-pivot-grid
+        [dataSource]="pivotDs"
+        [allowSortingBySummary]="true"
+        [allowFiltering]="true"
+        [showBorders]="true"
+        [showColumnTotals]="true"
+        [showRowTotals]="true"
+        [showColumnGrandTotals]="true"
+        [showRowGrandTotals]="true"
+        [fieldPanel]="{
+          visible: true,
+          showFilterFields: true,
+          showRowFields: true,
+          showColumnFields: true,
+          showDataFields: true
+        }">
+      </dx-pivot-grid>
+    </div>
   </div>
-</div>
-
 </div>

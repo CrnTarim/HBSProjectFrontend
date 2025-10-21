@@ -38,7 +38,7 @@ export class HCDecisionDto {
   bakanlikOnay: 0 | 1 = 0;
 }
 
-/** Artık her satırda bir tanı olacağı garanti: tanı alanlarını zorunlu yaptık */
+
 export class FactReport {
   reportId: string = '';
   reportCode: number = 0;
@@ -58,21 +58,18 @@ export class FactReport {
   provisionId: string = '';
   provisionCode: string = '';
 
-  forceId: string = '';
-  forceCode: string = '';
-  forceName: string = '';
+ 
+  rankId?: string;
+  rankName?: string;
+  forceId?: string;
+  forceName?: string;
 
-  rankId: string = '';
-  rankCode: string = '';
-  rankName: string = '';
+  decisionId?: string;
+  decisionCode?: number;
+  decisionName?: string;
 
-  diagnosisId: string = '';
-  diagnosisCode: string = '';
-  diagnosisName: string = '';
-
-  decisionId: string = '';
-  decisionCode: string = '';
-  decisionName: string = '';
+  diagnosesCsv: string = '';        
+  diagnosisCodesCsv: string = '';   
 
   /** API’de hesaplanan alan */
   issuer: 'MB' | 'PTM' | 'BH' = 'BH';
@@ -82,3 +79,5 @@ export interface DatetimeInput {
   StartDate: string;
   EndDate: string;
 }
+
+
