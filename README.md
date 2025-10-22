@@ -1,78 +1,161 @@
 [HttpPost("stats/fact")]
-public async Task<IActionResult> GetFact([FromBody] Datetimeinput dt)
+public async Task<IActionResult> GetFact([FromBody] Datetimeinput q)
 {
-    var start = dt.StartDate.Date;
-    var endEx = dt.EndDate.Date.AddDays(1);   // < endEx önemli
+    var start = q.StartDate.Date;
+    var endEx = q.EndDate.Date.AddDays(1);
 
-    // 1) Rapor×Tanı TEKİL
-    var rpDx =
-        _ctx.ReportDiagnoses.AsNoTracking()
-            .Select(x => new { x.ReportId, x.DiagnosisId })
-            .Distinct();
-
-    // 2) Her rapor için EN SON karar (EF için güvenli desen)
-    var rdMax =
-        from rd in _ctx.ReportDecisions.AsNoTracking()
-        group rd by rd.ReportId into g
-        select new { ReportId = g.Key, MaxCreated = g.Max(x => x.CreatedDate) };
-
-    // 3) Flat set (karar tekilleştirildi, tanı tekilleştirildi)
-    var q =
+    // 1) FLAT (LEFT JOIN’ler + bayraklar + son karar)
+    var flatQ =
         from r in _ctx.Reports.AsNoTracking()
         where r.CreatedDate >= start && r.CreatedDate < endEx
+
         join p in _ctx.Provisions.AsNoTracking() on r.ProvisionId equals p.Id
         join h in _ctx.Hospitals.AsNoTracking() on p.HospitalId equals h.Id
-        join c in _ctx.Cities.AsNoTracking()    on h.CityId     equals c.Id
+        join c in _ctx.Cities.AsNoTracking() on h.CityId equals c.Id
 
-        // Provision -> Dispatch (LEFT)
-        join d0 in _ctx.Dispatch.AsNoTracking() on p.DispatchId equals d0.Id into dg
-        from d in dg.DefaultIfEmpty()
+        join dg0 in _ctx.Dispatch.AsNoTracking() on p.DispatchId equals dg0.Id into dgx
+        from dg in dgx.DefaultIfEmpty()
 
-        // Dispatch -> Force/Rank (LEFT)
-        join f0 in _ctx.Forces.AsNoTracking() on d.ForceId equals f0.Id into fg
-        from f in fg.DefaultIfEmpty()
-        join rk0 in _ctx.Ranks.AsNoTracking() on d.RankId equals rk0.Id into rkg
-        from rk in rkg.DefaultIfEmpty()
+        join rk0 in _ctx.Ranks.AsNoTracking() on dg.RankId equals rk0.Id into rkx
+        from rk in rkx.DefaultIfEmpty()
 
-        // En son karar (LEFT)
-        join m in rdMax on r.Id equals m.ReportId into mg
-        from mx in mg.DefaultIfEmpty()
-        join rd1 in _ctx.ReportDecisions.AsNoTracking()
-             on new { ReportId = r.Id, Created = mx.MaxCreated }
-             equals new { ReportId = rd1.ReportId, Created = (DateTime?)rd1.CreatedDate } into rdg
-        from rd in rdg.DefaultIfEmpty()
-        join hcd0 in _ctx.HCDecisions.AsNoTracking() on rd.DecisionId equals hcd0.Id into hcdg
-        from hcd in hcdg.DefaultIfEmpty()
+        join f0 in _ctx.Forces.AsNoTracking() on dg.ForceId equals f0.Id into fx
+        from f in fx.DefaultIfEmpty()
 
-        // Tanı: TEKİL rapor×tanı seti
-        join pair in rpDx on r.Id equals pair.ReportId
-        join dx in _ctx.Diagnoses.AsNoTracking() on pair.DiagnosisId equals dx.Id
+        join rdx0 in _ctx.ReportDiagnoses.AsNoTracking() on r.Id equals rdx0.ReportId into rdxg
+        from rdx in rdxg.DefaultIfEmpty()
+
+        join dx0 in _ctx.Diagnoses.AsNoTracking() on rdx.DiagnosisId equals dx0.Id into dxg
+        from dx in dxg.DefaultIfEmpty()
 
         select new
         {
-            reportId = r.Id,
-            reportCode = r.Code,
-            createdDate = r.CreatedDate,
-            reportState = (int)r.State,
-            reportStateName = r.State.ToString(),
+            r.Id,
+            r.Code,
+            r.CreatedDate,
+            r.State,
 
-            cityId = c.Id, cityCode = c.CityCode, cityName = c.CityName,
-            hospitalId = h.Id, hospitalCode = h.Code, hospitalName = h.Name,
-            provisionId = p.Id, provisionCode = p.Code.ToString(),
+            CityId = c.Id,
+            c.CityCode,
+            c.CityName,
+            HospitalId = h.Id,
+            HospitalCode = h.Code,
+            HospitalName = h.Name,
+            ProvisionId = p.Id,
+            ProvisionCode = p.Code,
 
-            dispatchId = (Guid?)d.Id,
-            forceId = (Guid?)f.Id, forceCode = (int?)f.Code, forceName = f.Name,
-            rankId = (Guid?)rk.Id, rankCode = (int?)rk.Code, rankName = rk.Name,
+            RankId = (Guid?)(rk != null ? rk.Id : null),
+            RankName = rk != null ? rk.Name : null,
+            ForceId = (Guid?)(f != null ? f.Id : null),
+            ForceName = f != null ? f.Name : null,
 
-            diagnosisId = dx.Id, diagnosisCode = dx.Code, diagnosisName = dx.Name,
+            DxCode = dx != null ? dx.Code : null,
+            DxName = dx != null ? dx.Name : null,
 
-            decisionId = (Guid?)hcd?.Id,
-            decisionCode = (int?)hcd?.Code,
-            decisionName = hcd?.Name,
-            issuer = hcd == null ? "BH"
-                    : (hcd.BakanlikOnay == 1 ? "MB"
-                    : (hcd.TeminOnay == 1 ? "PTM" : "BH"))
+            // issuer bayrakları
+            HasMB  = _ctx.ReportDecisions.Any(z => z.ReportId == r.Id && z.HCDecision.BakanlikOnay == 1),
+            HasPTM = _ctx.ReportDecisions.Any(z => z.ReportId == r.Id && z.HCDecision.TeminOnay   == 1),
+
+            // son karar
+            LastDecision = (
+                from z in _ctx.ReportDecisions
+                where z.ReportId == r.Id
+                orderby z.CreatedDate descending
+                select new { z.Id, z.HCDecision.Code, z.HCDecision.Name }
+            ).FirstOrDefault(),
+
+            // approver (rapor üstündeki kullanıcı id)
+            ApproverUserId = r.ApprovalUserId    // tipin Guid? değilse uyumla
         };
 
-    return Ok(await q.ToListAsync());
+    var flat = await flatQ.ToListAsync();
+
+    // 2) RAPOR BAZINDA TEKILLEŞTIR (tanıları CSV yap)
+    var grouped = flat
+        .GroupBy(x => new
+        {
+            x.Id, x.Code, x.CreatedDate, x.State,
+            x.CityId, x.CityCode, x.CityName,
+            x.HospitalId, x.HospitalCode, x.HospitalName,
+            x.ProvisionId, x.ProvisionCode,
+            x.RankId, x.RankName, x.ForceId, x.ForceName,
+            x.HasMB, x.HasPTM, x.LastDecision,
+            x.ApproverUserId
+        })
+        .Select(g => new FactReportDto
+        {
+            ReportId        = g.Key.Id,
+            ReportCode      = g.Key.Code,
+            CreatedDate     = g.Key.CreatedDate,
+            ReportState     = (int)g.Key.State,
+            ReportStateName = g.Key.State.ToString(),
+
+            CityId          = g.Key.CityId,
+            CityCode        = g.Key.CityCode,
+            CityName        = g.Key.CityName,
+
+            HospitalId      = g.Key.HospitalId,
+            HospitalCode    = g.Key.HospitalCode,
+            HospitalName    = g.Key.HospitalName,
+
+            ProvisionId     = g.Key.ProvisionId,
+            ProvisionCode   = g.Key.ProvisionCode.ToString(),
+
+            RankId          = g.Key.RankId,
+            RankName        = g.Key.RankName,
+            ForceId         = g.Key.ForceId,
+            ForceName       = g.Key.ForceName,
+
+            DecisionId      = g.Key.LastDecision != null ? g.Key.LastDecision.Id   : (Guid?)null,
+            DecisionCode    = g.Key.LastDecision != null ? g.Key.LastDecision.Code : (int?)null,
+            DecisionName    = g.Key.LastDecision != null ? g.Key.LastDecision.Name : null,
+
+            Issuer          = g.Key.HasMB ? "MB" : (g.Key.HasPTM ? "PTM" : "BH"),
+
+            DiagnosesCsv        = string.Join("; ", g.Where(x => x.DxCode != null)
+                                                     .Select(x => $"{x.DxCode} - {x.DxName}")
+                                                     .Distinct()),
+            DiagnosisCodesCsv   = string.Join("; ", g.Where(x => x.DxCode != null)
+                                                     .Select(x => x.DxCode)
+                                                     .Distinct()),
+
+            // approver id’yi taşı
+            ApproverUserId  = g.Key.ApproverUserId
+        })
+        .ToList();
+
+    // 3) APPROVER KULLANICILARINI TEK SEFERDE ÇEK (AuthDbContext)
+    var approverIds = grouped.Where(r => r.ApproverUserId.HasValue)
+                             .Select(r => r.ApproverUserId!.Value)
+                             .Distinct()
+                             .ToList();
+
+    if (approverIds.Count > 0)
+    {
+        var users = await _auth.Users
+            .AsNoTracking()
+            .Where(u => approverIds.Contains(u.Id))
+            .Select(u => new
+            {
+                u.Id,
+                DisplayName = u.FullName ?? u.UserName,
+                u.Email
+            })
+            .ToListAsync();
+
+        var map = users.ToDictionary(u => u.Id, u => u);
+
+        // 4) IN-MEMORY EŞLE
+        foreach (var r in grouped)
+        {
+            if (r.ApproverUserId.HasValue && map.TryGetValue(r.ApproverUserId.Value, out var u))
+            {
+                r.ApproverName  = u.DisplayName;
+                r.ApproverEmail = u.Email;
+            }
+        }
+    }
+
+    return Ok(grouped);
 }
+
