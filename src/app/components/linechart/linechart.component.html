@@ -19,7 +19,7 @@
 
       <div class="right">
         <button (click)="onFetch()">Hesapla</button>
-        <div class="hint inline">Aktif kayıt: <b>{{ factActive.length }}</b></div>
+        <div class="hint inline">Aktif rapor (distinct): <b>{{ activeReportCount }}</b></div>
       </div>
     </div>
   </div>
@@ -104,7 +104,7 @@
           </div>
         </div>
 
-        <!-- Rütbe -->
+        <!-- Rütbe (ad ile) -->
         <div>
           <div class="section-toggle" (click)="openOnlyRegion('Rank')">
             <span>Rütbe filtresi</span>
@@ -114,9 +114,11 @@
             <input type="text" placeholder="Rütbe ara..." [(ngModel)]="rankSearch" class="searchbox">
             <div class="multi">
               <div class="options">
-                <label *ngFor="let r of ranksForUIFiltered()">
-                  <input type="checkbox" [checked]="isSelected(selectedRankIds, r.id)" (change)="toggleRank(r.id)">
-                  <span class="text">{{ r.name }}</span>
+                <label *ngFor="let h of ranksForUIFiltered()">
+                  <input type="checkbox"
+                         [checked]="isSelected(selectedRankNames, h.name)"
+                         (change)="toggleRank(h.name)">
+                  <span class="text">{{ h.name }}</span>
                 </label>
               </div>
             </div>
@@ -145,7 +147,6 @@
       </div>
     </div>
 
-    <!-- Kriter pilleri -->
     <div class="block">
       <div class="label">Kriter</div>
       <div class="pills">
@@ -218,10 +219,12 @@
                 </label>
               </div>
             </div>
+            <div class="hint">İpucu: Onaylayan filtresi üstte.</div>
           </div>
         </div>
       </div>
     </div>
+
 
     <!-- Yüzde ekseni -->
     <div class="block">
@@ -237,11 +240,15 @@
     <div class="block">
       <div class="label">Ölçüler</div>
       <label>
-        <input type="checkbox" [(ngModel)]="showCount" (change)="toggleMeasure('cntRows', showCount)">
-        <span>Rapor (count)</span>
+        <input type="checkbox"
+               [(ngModel)]="showCount"
+               (change)="toggleMeasure('cntRows', showCount)">
+        <span>Rapor (sayısı)</span>
       </label>
       <label style="margin-left:16px;">
-        <input type="checkbox" [(ngModel)]="showDistinct" (change)="toggleMeasure('cntDistinctReports', showDistinct)">
+        <input type="checkbox"
+               [(ngModel)]="showDistinct"
+               (change)="toggleMeasure('cntDistinctReports', showDistinct)">
         <span>Rapor (distinct)</span>
       </label>
     </div>

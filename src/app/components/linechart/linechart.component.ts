@@ -13,11 +13,12 @@ type ColumnKey = 'Diagnosis' | 'ReportState' | 'Decision';
 
 type FactRow = FactReport & {
   created: Date;
-  diagnosisCodesCsv: string;
-  diagnosesCsv: string;
-  reportStateName: string;
+  diagnosisCodesCsv?: string;
+  diagnosesCsv?: string;
+  reportStateName?: string;
   issuer: Issuer;
-  diagSingle?: string;
+  diagSingle?: string;   // sanal (tek tanı sütunu)
+  w?: number;            // ağırlık (1/k)
 };
 
 @Component({
@@ -45,6 +46,9 @@ export class LinechartComponent implements OnInit {
   ranks: RankDto[] = [];
   forces: ForceDto[] = [];
   stateNames: string[] = [];
+
+  /* ---- Ekran üstündeki aktif distinct rapor sayısı ---- */
+  activeReportCount = 0;
 
   /* ---- State sözlüğü ---- */
   private static REPORT_STATE_TR: { [k: string]: string } = {
@@ -75,7 +79,8 @@ export class LinechartComponent implements OnInit {
   selectedStates: string[] = [];
   issuers: Issuer[] = ['MB','PTM','BH'];
   selectedIssuers: Issuer[] = [];
-  selectedRankIds: string[] = [];
+  /** Rütbeyi isimle filtreliyoruz (HTML buna göre) */
+  selectedRankNames: string[] = [];
   selectedForceIds: string[] = [];
 
   /* ---- Veri ---- */
@@ -92,8 +97,8 @@ export class LinechartComponent implements OnInit {
   public rowSelected = { Issuer: false, City: true, Hospital: false, Rank: false, Force: false };
 
   /* ---- Ölçü görünürlükleri ---- */
-  public showCount = true;
-  public showDistinct = true;
+  public showCount = true;     // Rapor (sayısı)
+  public showDistinct = false; // ikinci metrik opsiyonel
 
   /* ---- Filtre panel bayrakları ---- */
   openCity = false;
@@ -114,7 +119,7 @@ export class LinechartComponent implements OnInit {
   rankSearch = '';
   forceSearch = '';
 
-  /* ================== HELPERS (Angular 6 uyumlu) ================== */
+  /* ================== HELPERS ================== */
   private firstDefined<T>(...vals: (T | null | undefined)[]): T | undefined {
     for (let i = 0; i < vals.length; i++) {
       const v = vals[i];
@@ -174,7 +179,7 @@ export class LinechartComponent implements OnInit {
   /* ================== DATA FETCH (FACT) ================== */
   onFetch(): void {
     if (!this.startDateStr || !this.endDateStr){
-      this.factAll=[]; this.factActive=[]; this.pivotDs=null; return;
+      this.factAll=[]; this.factActive=[]; this.pivotDs=null; this.activeReportCount = 0; return;
     }
     this.datetimeInput.StartDate = this.startDateStr;
     this.datetimeInput.EndDate   = this.endDateStr;
@@ -184,14 +189,17 @@ export class LinechartComponent implements OnInit {
         const data: FactRow[] = (rows || []).map((r: any) => {
           const createdDateStr = this.firstDefined<string>(r.createdDate, r.CreatedDate) as string;
 
-          // normalize alanlar (Angular 6 uyumlu)
+          // normalize alanlar
           const normalized: any = {
             reportId:        this.firstDefined(r.reportId,        r.ReportId),
             reportCode:      this.firstDefined(r.reportCode,      r.ReportCode),
             reportState:     this.firstDefined(r.reportState,     r.ReportState),
             reportStateName: this.firstDefined(r.reportStateName, r.ReportStateName),
+            
             cityId:          this.firstDefined(r.cityId,          r.CityId),
-            cityName:        this.firstDefined(r.cityName,        r.CityName),
+            cityName:  this.firstDefined(r.cityName, r.CityName),
+            cityCode:  Number(this.firstDefined(r.cityCode, r.CityCode)),
+
             hospitalId:      this.firstDefined(r.hospitalId,      r.HospitalId),
             hospitalName:    this.firstDefined(r.hospitalName,    r.HospitalName),
             provisionId:     this.firstDefined(r.provisionId,     r.ProvisionId),
@@ -199,23 +207,25 @@ export class LinechartComponent implements OnInit {
             decisionName:    this.firstDefined(r.decisionName,    r.DecisionName),
             rankId:          this.firstDefined(r.rankId,          r.RankId),
             rankName:        this.firstDefined(r.rankName,        r.RankName),
-            forceId:         this.firstDefined(r.forceId,         r.ForceId),
+
+            forceId:         this.firstDefined(r.forceId,         r.ForceId), 
+            forceCode:         this.firstDefined(r.forceCode,         r.ForceCode),
             forceName:       this.firstDefined(r.forceName,       r.ForceName),
-            diagnosisCodesCsv: (this.firstDefined(r.diagnosisCodesCsv, r.DiagnosisCodesCsv) || '') as string,
-            diagnosesCsv:      (this.firstDefined(r.diagnosesCsv,      r.DiagnosesCsv)      || '') as string,
+
+            diagnosisCodesCsv: (this.firstDefined(r.diagnosisCodesCsv, r.DiagnosesCsv, r.DiagnosisCodesCsv) || '') as string,
+            diagnosesCsv:      (this.firstDefined(r.diagnosesCsv,      r.DiagnosesCsv)                      || '') as string,
             issuer:            (this.firstDefined(r.issuer, r.Issuer) || 'BH') as Issuer,
             createdDate: createdDateStr,
             created: new Date(createdDateStr)
           };
 
-          // orijinaliyle birleştir (Object.assign Angular 6 için güvenli)
           return Object.assign({}, r, normalized) as FactRow;
         });
 
         this.factAll = data;
         this.applyFilters(true);
       },
-      err => { console.error('getFact error', err); this.factAll=[]; this.factActive=[]; this.pivotDs=null; }
+      err => { console.error('getFact error', err); this.factAll=[]; this.factActive=[]; this.pivotDs=null; this.activeReportCount = 0; }
     );
   }
 
@@ -270,7 +280,8 @@ export class LinechartComponent implements OnInit {
   toggleDecision(id: any)   { this.selectedDecisionIds  = this.toggleIn(this.selectedDecisionIds, id);   this.applyFilters(); }
   toggleState(name: string) { this.selectedStates       = this.toggleIn(this.selectedStates, name);      this.applyFilters(); }
   toggleIssuer(name: Issuer){ this.selectedIssuers      = this.toggleIn(this.selectedIssuers, name);     this.applyFilters(); }
-  toggleRank(id: any)       { this.selectedRankIds      = this.toggleIn(this.selectedRankIds, id);       this.applyFilters(); }
+  /** Rütbe artık İSİM ile seçiliyor */
+  toggleRank(name: string)  { this.selectedRankNames    = this.toggleIn(this.selectedRankNames, name);   this.applyFilters(); }
   toggleForce(id: any)      { this.selectedForceIds     = this.toggleIn(this.selectedForceIds, id);      this.applyFilters(); }
 
   /* ================== PANEL AÇ/KAPA ================== */
@@ -307,13 +318,13 @@ export class LinechartComponent implements OnInit {
     fields.push(issuer);
 
     if (this.rowSelected.Force) {
-      fields.push({ dataField: 'forceName', caption: 'Kuvvet', area: 'row' });
+      fields.push({ dataField: 'forceCode', caption: 'Kuvvet', area: 'row' });
     }
     if (this.rowSelected.Rank) {
       fields.push({ dataField: 'rankName', caption: 'Rütbe', area: 'row' });
     }
     if (this.rowSelected.City) {
-      fields.push({ dataField: 'cityName', caption: 'Şehir', area: 'row' });
+      fields.push({ dataField: 'cityCode', caption: 'Şehir', area: 'row' });
     }
     if (this.rowSelected.Hospital) {
       fields.push({ dataField: 'hospitalName', caption: 'Hastane', area: 'row' });
@@ -343,16 +354,35 @@ export class LinechartComponent implements OnInit {
       }
     }
 
-    // ---- Veri alanları ----
+    // ---- Ölçüler ----
+    // A) DISTINCT rapor sayısı (asıl sayı)
     fields.push({
       name: 'cntRows',
-      caption: 'Rapor (count)',
+      caption: 'Rapor (sayısı)',
       area: 'data',
       dataField: 'reportId',
-      summaryType: 'count',
+      summaryType: 'custom',
+      calculateCustomSummary: (o:any) => this.calcDistinctReport(o),
       visible: this.showCount
     });
 
+    // B) Oran: ağırlık toplamı (1/k) — %’leri pivot hesaplar
+    const mode = this.percentBasis === 'row'
+      ? 'percentOfRowTotal'
+      : (this.percentBasis === 'column' ? 'percentOfColumnTotal' : 'percentOfGrandTotal');
+
+    fields.push({
+      name: 'ratioOnCount',
+      caption: 'Oran (rapor %)',
+      area: 'data',
+      dataField: 'w',
+      summaryType: 'sum',
+      summaryDisplayMode: mode,
+      format: { type: 'percent', precision: 2 },
+      visible: true
+    });
+
+    // İkinci metrik istersek
     fields.push({
       name: 'cntDistinctReports',
       caption: 'Rapor (distinct)',
@@ -361,21 +391,6 @@ export class LinechartComponent implements OnInit {
       summaryType: 'custom',
       calculateCustomSummary: (o:any) => this.calcDistinctReport(o),
       visible: this.showDistinct
-    });
-
-    const mode = this.percentBasis === 'row'
-      ? 'percentOfRowTotal'
-      : (this.percentBasis === 'column' ? 'percentOfColumnTotal' : 'percentOfGrandTotal');
-
-    fields.push({
-      name: 'ratioOnCount',
-      caption: 'Oran (count)',
-      area: 'data',
-      dataField: 'reportId',
-      summaryType: 'count',
-      summaryDisplayMode: mode,
-      format: { type: 'percent', precision: 2 },
-      visible: true
     });
 
     return fields;
@@ -392,7 +407,7 @@ export class LinechartComponent implements OnInit {
     }
   }
 
-  /* ================== FİLTRE & SANAL PATLATMA ================== */
+  /* ================== FİLTRE & AĞIRLIKLANDIRMA ================== */
   private applyFilters(initial = false): void {
     // Seçili tanı ID → kod seti
     const selectedDiagCodes = new Set(
@@ -406,7 +421,7 @@ export class LinechartComponent implements OnInit {
     const selState    = new Set(this.selectedStates.map(String));
     const selIssuer   = new Set(this.selectedIssuers.map(String));
     const selDecision = new Set(this.selectedDecisionIds.map(String));
-    const selRank     = new Set(this.selectedRankIds.map(String));
+    const selRankName = new Set(this.selectedRankNames.map(String));
     const selForce    = new Set(this.selectedForceIds.map(String));
 
     const diagnosisInColumns = this.columnOrder.indexOf('Diagnosis') !== -1;
@@ -418,27 +433,19 @@ export class LinechartComponent implements OnInit {
       const reportCodesSet = new Set(this._codes(r.diagnosisCodesCsv));
       const reportCodesArr = Array.from(reportCodesSet);
 
-      if (diagnosisInColumns && selectedDiagCodes.size) {
-        let pushed = false;
-        Array.from(selectedDiagCodes).forEach(code => {
-          if (reportCodesSet.has(code)) {
-            prepared.push(Object.assign({}, r, { diagSingle: code }));
-            pushed = true;
+      if (diagnosisInColumns) {
+        const targetCodes = selectedDiagCodes.size
+          ? reportCodesArr.filter(code => selectedDiagCodes.has(code))
+          : reportCodesArr;
+
+        if (targetCodes.length > 0) {
+          const w = 1 / targetCodes.length;
+          for (let j = 0; j < targetCodes.length; j++) {
+            prepared.push(Object.assign({}, r, { diagSingle: targetCodes[j], w }));
           }
-        });
-        if (!pushed) {
-          // seçili tanılardan hiçbiri yoksa, at
-        }
-      } else if (diagnosisInColumns && !selectedDiagCodes.size) {
-        if (reportCodesArr.length > 0) {
-          for (let j = 0; j < reportCodesArr.length; j++) {
-            prepared.push(Object.assign({}, r, { diagSingle: reportCodesArr[j] }));
-          }
-        } else {
-          prepared.push(Object.assign({}, r, { diagSingle: '(Tanısız)' }));
         }
       } else {
-        prepared.push(r);
+        prepared.push(Object.assign({}, r, { w: 1 }));
       }
     }
 
@@ -447,7 +454,7 @@ export class LinechartComponent implements OnInit {
       if (selIssuer.size   && !selIssuer.has(String(r.issuer))) return false;
       if (selCity.size     && !selCity.has(String(r.cityId))) return false;
       if (selHosp.size     && !selHosp.has(String(r.hospitalId))) return false;
-      if (selRank.size     && (!r.rankId || !selRank.has(String(r.rankId)))) return false;
+      if (selRankName.size && (!r.rankName || !selRankName.has(String(r.rankName)))) return false;
       if (selForce.size    && (!r.forceId || !selForce.has(String(r.forceId)))) return false;
       if (selState.size    && !selState.has(String(r.reportStateName))) return false;
       if (selDecision.size && (!r.decisionId || !selDecision.has(String(r.decisionId)))) return false;
@@ -455,7 +462,17 @@ export class LinechartComponent implements OnInit {
     });
 
     this.factActive = filtered;
+    this.recomputeActiveCount();
     this.updatePivot();
+  }
+
+  private recomputeActiveCount(){
+    const set = new Set<string>();
+    for (let i=0; i<this.factActive.length; i++){
+      const id = String(this.factActive[i].reportId || '');
+      if (id) set.add(id);
+    }
+    this.activeReportCount = set.size;
   }
 
   /* ================== PIVOT ================== */

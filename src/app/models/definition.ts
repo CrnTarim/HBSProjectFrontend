@@ -62,6 +62,7 @@ export class FactReport {
   rankId?: string;
   rankName?: string;
   forceId?: string;
+  forceCode?:string;
   forceName?: string;
 
   decisionId?: string;
