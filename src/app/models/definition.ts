@@ -38,6 +38,18 @@ export class HCDecisionDto {
   bakanlikOnay: 0 | 1 = 0;
 }
 
+export class ApproverDto {
+  id: string = '';
+  code: string = '';
+  name: string = '';
+}
+
+
+export class ReviewerDto {
+  id: string = '';
+  code: string = '';
+  name: string = '';
+}
 
 export class FactReport {
   reportId: string = '';
@@ -70,7 +82,10 @@ export class FactReport {
   decisionName?: string;
 
   diagnosesCsv: string = '';        
-  diagnosisCodesCsv: string = '';   
+  diagnosisCodesCsv: string = ''; 
+  
+  reviewerId? : string;
+  approverId? : string;
 
   /** API’de hesaplanan alan */
   issuer: 'MB' | 'PTM' | 'BH' = 'BH';

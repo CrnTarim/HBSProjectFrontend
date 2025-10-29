@@ -53,7 +53,13 @@
             <span class="chev" [class.open]="openCity">▾</span>
           </div>
           <div class="collapsible" [class.open]="openCity">
-            <input type="text" placeholder="Şehir ara..." [(ngModel)]="citySearch" class="searchbox">
+            <div class="search-row">
+              <input type="text" placeholder="Şehir ara..." [(ngModel)]="citySearch" class="searchbox small">
+              <div class="btns">
+                <button type="button" (click)="selectAllCities()">Tümünü Seç</button>
+                <button type="button" (click)="clearAllCities()">Temizle</button>
+              </div>
+            </div>
             <div class="multi">
               <div class="options">
                 <label *ngFor="let c of citiesFiltered()">
@@ -72,7 +78,13 @@
             <span class="chev" [class.open]="openHospital">▾</span>
           </div>
           <div class="collapsible" [class.open]="openHospital">
-            <input type="text" placeholder="Hastane ara..." [(ngModel)]="hospitalSearch" class="searchbox">
+            <div class="search-row">
+              <input type="text" placeholder="Hastane ara..." [(ngModel)]="hospitalSearch" class="searchbox small">
+              <div class="btns">
+                <button type="button" (click)="selectAllHospitals()">Tümünü Seç</button>
+                <button type="button" (click)="clearAllHospitals()">Temizle</button>
+              </div>
+            </div>
             <div class="multi">
               <div class="options">
                 <label *ngFor="let h of hospitalsForUIFiltered()">
@@ -92,7 +104,13 @@
             <span class="chev" [class.open]="openForce">▾</span>
           </div>
           <div class="collapsible" [class.open]="openForce">
-            <input type="text" placeholder="Kuvvet ara..." [(ngModel)]="forceSearch" class="searchbox">
+            <div class="search-row">
+              <input type="text" placeholder="Kuvvet ara..." [(ngModel)]="forceSearch" class="searchbox small">
+              <div class="btns">
+                <button type="button" (click)="selectAllForces()">Tümünü Seç</button>
+                <button type="button" (click)="clearAllForces()">Temizle</button>
+              </div>
+            </div>
             <div class="multi">
               <div class="options">
                 <label *ngFor="let f of forcesForUIFiltered()">
@@ -104,14 +122,20 @@
           </div>
         </div>
 
-        <!-- Rütbe (ad ile) -->
+        <!-- Rütbe -->
         <div>
           <div class="section-toggle" (click)="openOnlyRegion('Rank')">
             <span>Rütbe filtresi</span>
             <span class="chev" [class.open]="openRank">▾</span>
           </div>
           <div class="collapsible" [class.open]="openRank">
-            <input type="text" placeholder="Rütbe ara..." [(ngModel)]="rankSearch" class="searchbox">
+            <div class="search-row">
+              <input type="text" placeholder="Rütbe ara..." [(ngModel)]="rankSearch" class="searchbox small">
+              <div class="btns">
+                <button type="button" (click)="selectAllRanks()">Tümünü Seç</button>
+                <button type="button" (click)="clearAllRanks()">Temizle</button>
+              </div>
+            </div>
             <div class="multi">
               <div class="options">
                 <label *ngFor="let h of ranksForUIFiltered()">
@@ -132,6 +156,12 @@
             <span class="chev" [class.open]="openIssuer">▾</span>
           </div>
           <div class="collapsible" [class.open]="openIssuer">
+            <div class="search-row">
+              <div class="btns">
+                <button type="button" (click)="selectAllIssuers()">Tümünü Seç</button>
+                <button type="button" (click)="clearAllIssuers()">Temizle</button>
+              </div>
+            </div>
             <div class="multi">
               <div class="options">
                 <label *ngFor="let i of issuers">
@@ -172,7 +202,13 @@
             <span class="chev" [class.open]="openDiagnosis">▾</span>
           </div>
           <div class="collapsible" [class.open]="openDiagnosis">
-            <input type="text" placeholder="Tanı ara..." [(ngModel)]="diagnosisSearch" class="searchbox">
+            <div class="search-row">
+              <input type="text" placeholder="Tanı ara..." [(ngModel)]="diagnosisSearch" class="searchbox small">
+              <div class="btns">
+                <button type="button" (click)="selectAllDiagnoses()">Tümünü Seç</button>
+                <button type="button" (click)="clearAllDiagnoses()">Temizle</button>
+              </div>
+            </div>
             <div class="multi">
               <div class="options">
                 <label *ngFor="let d of diagnosesFiltered()">
@@ -191,7 +227,13 @@
             <span class="chev" [class.open]="openState">▾</span>
           </div>
           <div class="collapsible" [class.open]="openState">
-            <input type="text" placeholder="Durum ara..." [(ngModel)]="stateSearch" class="searchbox">
+            <div class="search-row">
+              <input type="text" placeholder="Durum ara..." [(ngModel)]="stateSearch" class="searchbox small">
+              <div class="btns">
+                <button type="button" (click)="selectAllStates()">Tümünü Seç</button>
+                <button type="button" (click)="clearAllStates()">Temizle</button>
+              </div>
+            </div>
             <div class="multi">
               <div class="options">
                 <label *ngFor="let s of statesFiltered()">
@@ -210,7 +252,13 @@
             <span class="chev" [class.open]="openDecision">▾</span>
           </div>
           <div class="collapsible" [class.open]="openDecision">
-            <input type="text" placeholder="Karar ara (ad/kod)..." [(ngModel)]="decisionSearch" class="searchbox">
+            <div class="search-row">
+              <input type="text" placeholder="Karar ara (ad/kod)..." [(ngModel)]="decisionSearch" class="searchbox small">
+              <div class="btns">
+                <button type="button" (click)="selectAllDecisions()">Tümünü Seç</button>
+                <button type="button" (click)="clearAllDecisions()">Temizle</button>
+              </div>
+            </div>
             <div class="multi decisions">
               <div class="options">
                 <label *ngFor="let k of decisionsFiltered()">
@@ -224,7 +272,6 @@
         </div>
       </div>
     </div>
-
 
     <!-- Yüzde ekseni -->
     <div class="block">

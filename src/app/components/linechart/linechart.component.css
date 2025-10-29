@@ -237,6 +237,11 @@ button.on {
   outline: 0;
 }
 
+.search-row { display:flex; align-items:center; gap:8px; }
+.searchbox.small { flex: 1 1 auto; max-width: 280px; }
+.search-row .btns button { margin-left: 4px; }
+
+
 @media (max-width: 700px) {
   .row {
     grid-template-columns: 1fr;

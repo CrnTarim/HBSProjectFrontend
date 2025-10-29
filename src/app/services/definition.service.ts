@@ -1,4 +1,4 @@
-import { DatetimeInput, ForceDto, RankDto } from './../models/definition';
+import { ApproverDto, DatetimeInput, ForceDto, RankDto, ReviewerDto } from './../models/definition';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -38,6 +38,15 @@ export class DefinitionService {
   getForces(): Observable<ForceDto[]> {
     return this.http.get<ForceDto[]>(`${this.url}/force`);
   }
+
+  getApprover(): Observable<ApproverDto[]> {
+    return this.http.get<ApproverDto[]>(`${this.url}/approver`);
+  }
+
+  getViewer(): Observable<ReviewerDto[]> {
+    return this.http.get<ReviewerDto[]>(`${this.url}/reviewer`);
+  }
+
 
   issuerOf(dec: HCDecisionDto): 'MB' | 'PTM' | 'BH' {
     if (dec.bakanlikOnay === 1) return 'MB';

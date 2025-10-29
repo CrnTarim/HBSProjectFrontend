@@ -71,7 +71,7 @@ export class LinechartComponent implements OnInit {
     'WaitingForReview','WaitingForCompletedWithNoApproval','Cancelled','CompletedAnnotationManuel'
   ];
 
-  /* ---- Slicer seçimleri ---- */
+  /* ---- Slicer seçimleri (default: hiçbiri seçili değil) ---- */
   selectedCityIds: string[] = [];
   selectedHospitalIds: string[] = [];
   selectedDiagnosisIds: string[] = []; // Tanı ID’leri
@@ -197,8 +197,8 @@ export class LinechartComponent implements OnInit {
             reportStateName: this.firstDefined(r.reportStateName, r.ReportStateName),
             
             cityId:          this.firstDefined(r.cityId,          r.CityId),
-            cityName:  this.firstDefined(r.cityName, r.CityName),
-            cityCode:  Number(this.firstDefined(r.cityCode, r.CityCode)),
+            cityName:        this.firstDefined(r.cityName,        r.CityName),
+            cityCode:        Number(this.firstDefined(r.cityCode, r.CityCode)),
 
             hospitalId:      this.firstDefined(r.hospitalId,      r.HospitalId),
             hospitalName:    this.firstDefined(r.hospitalName,    r.HospitalName),
@@ -209,12 +209,15 @@ export class LinechartComponent implements OnInit {
             rankName:        this.firstDefined(r.rankName,        r.RankName),
 
             forceId:         this.firstDefined(r.forceId,         r.ForceId), 
-            forceCode:         this.firstDefined(r.forceCode,         r.ForceCode),
+            forceCode:       this.firstDefined(r.forceCode,       r.ForceCode),
             forceName:       this.firstDefined(r.forceName,       r.ForceName),
 
             diagnosisCodesCsv: (this.firstDefined(r.diagnosisCodesCsv, r.DiagnosesCsv, r.DiagnosisCodesCsv) || '') as string,
             diagnosesCsv:      (this.firstDefined(r.diagnosesCsv,      r.DiagnosesCsv)                      || '') as string,
             issuer:            (this.firstDefined(r.issuer, r.Issuer) || 'BH') as Issuer,
+
+            reviewerId : this.firstDefined(r.reviewerId,         r.ReviewerId), 
+            approverId : this.firstDefined(r.approverId,         r.ApproverId), 
             createdDate: createdDateStr,
             created: new Date(createdDateStr)
           };
@@ -276,7 +279,7 @@ export class LinechartComponent implements OnInit {
   /* ================== TOGGLES ================== */
   toggleCity(id: any)       { this.selectedCityIds      = this.toggleIn(this.selectedCityIds, id);       this.applyFilters(); }
   toggleHospital(id: any)   { this.selectedHospitalIds  = this.toggleIn(this.selectedHospitalIds, id);   this.applyFilters(); }
-  toggleDiagnosis(id: any)  { this.selectedDiagnosisIds = this.toggleIn(this.selectedDiagnosisIds, id);  this.applyFilters(); }
+  toggleDiagnosis(id: any)  { this.selectedDiagnosisIds = this.toggleIn(this.selectedDiagnosisIds, id);  this.applyFilters(true); }
   toggleDecision(id: any)   { this.selectedDecisionIds  = this.toggleIn(this.selectedDecisionIds, id);   this.applyFilters(); }
   toggleState(name: string) { this.selectedStates       = this.toggleIn(this.selectedStates, name);      this.applyFilters(); }
   toggleIssuer(name: Issuer){ this.selectedIssuers      = this.toggleIn(this.selectedIssuers, name);     this.applyFilters(); }
@@ -416,14 +419,6 @@ export class LinechartComponent implements OnInit {
         .map(d => String(d.code))
     );
 
-    const selCity     = new Set(this.selectedCityIds.map(String));
-    const selHosp     = new Set(this.selectedHospitalIds.map(String));
-    const selState    = new Set(this.selectedStates.map(String));
-    const selIssuer   = new Set(this.selectedIssuers.map(String));
-    const selDecision = new Set(this.selectedDecisionIds.map(String));
-    const selRankName = new Set(this.selectedRankNames.map(String));
-    const selForce    = new Set(this.selectedForceIds.map(String));
-
     const diagnosisInColumns = this.columnOrder.indexOf('Diagnosis') !== -1;
 
     let prepared: FactRow[] = [];
@@ -449,7 +444,15 @@ export class LinechartComponent implements OnInit {
       }
     }
 
-    // Diğer slicer filtreleri
+    // Diğer slicer filtreleri SENİN MEVCUT AKIŞINDA olduğu gibi burada kalabilir
+    const selCity     = new Set(this.selectedCityIds.map(String));
+    const selHosp     = new Set(this.selectedHospitalIds.map(String));
+    const selState    = new Set(this.selectedStates.map(String));
+    const selIssuer   = new Set(this.selectedIssuers.map(String));
+    const selDecision = new Set(this.selectedDecisionIds.map(String));
+    const selRankName = new Set(this.selectedRankNames.map(String));
+    const selForce    = new Set(this.selectedForceIds.map(String));
+
     const filtered = prepared.filter(r => {
       if (selIssuer.size   && !selIssuer.has(String(r.issuer))) return false;
       if (selCity.size     && !selCity.has(String(r.cityId))) return false;
@@ -461,9 +464,16 @@ export class LinechartComponent implements OnInit {
       return true;
     });
 
-    this.factActive = filtered;
-    this.recomputeActiveCount();
-    this.updatePivot();
+    // ---- güncelle + reload ----
+    if (this.pivotDs && !initial) {
+      this.factActive.splice(0, this.factActive.length, ...filtered);
+      this.recomputeActiveCount();
+      this.pivotDs.reload();
+    } else {
+      this.factActive = filtered;
+      this.recomputeActiveCount();
+      this.updatePivot();
+    }
   }
 
   private recomputeActiveCount(){
@@ -504,4 +514,44 @@ export class LinechartComponent implements OnInit {
     const i = this.columnOrder.indexOf(kind);
     return i >= 0 ? i+1 : null;
   }
+
+  /* ================== TOPLU SEÇ / TEMİZLE ================== */
+  // Şehir
+  selectAllCities(){ this.selectedCityIds = this.citiesFiltered().map(c => String(c.id)); this.applyFilters(); }
+  clearAllCities(){ this.selectedCityIds = []; this.applyFilters(); }
+
+  // Hastane (şehre göre daralan liste)
+  selectAllHospitals(){ this.selectedHospitalIds = this.hospitalsForUIFiltered().map(h => String(h.id)); this.applyFilters(); }
+  clearAllHospitals(){ this.selectedHospitalIds = []; this.applyFilters(); }
+
+  // Kuvvet
+  selectAllForces(){ this.selectedForceIds = this.forcesForUIFiltered().map(f => String(f.id)); this.applyFilters(); }
+  clearAllForces(){ this.selectedForceIds = []; this.applyFilters(); }
+
+  // Rütbe (isimle)
+  selectAllRanks(){ this.selectedRankNames = this.ranksForUIFiltered().map(r => String(r.name)); this.applyFilters(); }
+  clearAllRanks(){ this.selectedRankNames = []; this.applyFilters(); }
+
+  // Onaylayan
+  selectAllIssuers(){ this.selectedIssuers = this.issuers.slice(); this.applyFilters(); }
+  clearAllIssuers(){ this.selectedIssuers = []; this.applyFilters(); }
+
+  // Tanı (ID) — çoğaltma/ağırlık değiştiği için initial=true
+  selectAllDiagnoses(){ this.selectedDiagnosisIds = this.diagnosesFiltered().map(d => String(d.id)); this.applyFilters(true); }
+  clearAllDiagnoses(){ this.selectedDiagnosisIds = []; this.applyFilters(true); }
+
+  // Durum (EN key)
+  selectAllStates(){ this.selectedStates = this.statesFiltered().slice(); this.applyFilters(); }
+  clearAllStates(){ this.selectedStates = []; this.applyFilters(); }
+  // Karar — toplu seç / temizle
+selectAllDecisions() {
+  this.selectedDecisionIds = this.decisionsFiltered().map(k => String(k.id));
+  this.applyFilters();  // tanıya dokunmadığı için initial=false
+}
+
+clearAllDecisions() {
+  this.selectedDecisionIds = [];
+  this.applyFilters();
+}
+
 }
