@@ -11,6 +11,7 @@ import { PersonComponent } from './components/person/person.component';
 import { ReportComponent } from './components/report/report.component';
 import { ReportgridComponent } from './components/reportgrid/reportgrid.component';
 import { LinechartComponent } from './components/linechart/linechart.component';
+import { RankComponent } from './components/definitions/rank/rank.component';
 
 const routes: Routes = [
 
@@ -28,7 +29,9 @@ const routes: Routes = [
  
   {path:'report',component:ReportComponent},
   {path:'reportgrid',component:ReportgridComponent},
-  {path:'statistic',component:LinechartComponent}
+  {path:'statistic',component:LinechartComponent},
+  { path: 'definitions/ranks', component: RankComponent }
+
   
 ];
 

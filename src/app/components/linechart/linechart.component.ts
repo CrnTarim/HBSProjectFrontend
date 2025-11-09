@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import PivotGridDataSource from 'devextreme/ui/pivot_grid/data_source';
 import { forkJoin } from 'rxjs';
-import { DefinitionService } from '../../services/definition.service';
+import { StatisticService } from '../../services/statistic.service';
 import {
   CityDto, HospitalDto, DiagnosisDto, HCDecisionDto, FactReport,
   DatetimeInput, RankDto, ForceDto
-} from '../../models/definition';
+} from '../../models/statistic';
 
 type Issuer = 'MB' | 'PTM' | 'BH';
 type PercentBasis = 'row' | 'column' | 'grand';
@@ -28,7 +28,7 @@ type FactRow = FactReport & {
 })
 export class LinechartComponent implements OnInit {
 
-  constructor(private api: DefinitionService) {}
+  constructor(private api:StatisticService) {}
 
   /* ---- Tarih ---- */
   startDateStr = '';
@@ -131,11 +131,15 @@ export class LinechartComponent implements OnInit {
   private toInputDate(d: Date){
     return d.getFullYear() + '-' + this.pad2(d.getMonth()+1) + '-' + this.pad2(d.getDate());
   }
-  private _match(q: string, text: any): boolean {
-    if (!q) return true;
-    if (text == null) return false;
-    return String(text).toLowerCase().indexOf(q.toLowerCase()) !== -1;
-  }
+ private _match(q: string, text: any): boolean {
+  if (!q) return true;
+  if (text == null) return false;
+  // Türkçe karakterleri normalize et (İ->i, ı->i vs.)
+  const normalize = (s: string) =>
+    s.toLocaleLowerCase('tr-TR').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return normalize(String(text)).includes(normalize(q));
+}
+
   private _codes(csv: string | null | undefined): string[] {
     if (!csv) return [];
     return String(csv).split(';').map(s => s.trim()).filter(Boolean);
@@ -294,6 +298,8 @@ export class LinechartComponent implements OnInit {
     this.openIssuer   = (which === 'Issuer')   ? !this.openIssuer   : false;
     this.openRank     = (which === 'Rank')     ? !this.openRank     : false;
     this.openForce    = (which === 'Force')    ? !this.openForce    : false;
+
+
   }
   openOnlyCriteria(which: 'Diagnosis' | 'ReportState' | 'Decision') {
     this.openDiagnosis = (which === 'Diagnosis')   ? !this.openDiagnosis : false;
@@ -302,14 +308,30 @@ export class LinechartComponent implements OnInit {
   }
 
   /* ================== ROW TOGGLE ================== */
+  // public toggleRow(kind: 'Issuer' | 'City' | 'Hospital' | 'Rank' | 'Force') {
+  //   (this.rowSelected as any)[kind] = !(this.rowSelected as any)[kind];
+  //   if (!this.rowSelected.Issuer && !this.rowSelected.City && !this.rowSelected.Hospital && !this.rowSelected.Force && !this.rowSelected.Rank) {
+  //     (this.rowSelected as any)[kind] = true;
+  //   }
+  //   this.openOnlyRegion(kind);
+  //   this.updatePivot();
+  // }
+
   public toggleRow(kind: 'Issuer' | 'City' | 'Hospital' | 'Rank' | 'Force') {
-    (this.rowSelected as any)[kind] = !(this.rowSelected as any)[kind];
-    if (!this.rowSelected.Issuer && !this.rowSelected.City && !this.rowSelected.Hospital && !this.rowSelected.Force && !this.rowSelected.Rank) {
-      (this.rowSelected as any)[kind] = true;
-    }
-    this.openOnlyRegion(kind);
-    this.updatePivot();
-  }
+
+  (this.rowSelected as any)[kind] = !(this.rowSelected as any)[kind];
+
+  // 2️⃣ Aynı anda toggle açık/kapalı durumu da değişsin (bağımsız)
+  if (kind === 'City')     this.openCity = this.rowSelected.City;
+  if (kind === 'Hospital') this.openHospital = this.rowSelected.Hospital;
+  if (kind === 'Issuer')   this.openIssuer = this.rowSelected.Issuer;
+  if (kind === 'Rank')     this.openRank = this.rowSelected.Rank;
+  if (kind === 'Force')    this.openForce = this.rowSelected.Force;
+
+  
+  this.updatePivot();
+}
+
 
   /* ================== PIVOT FIELDS ================== */
   private buildFields(): any[] {

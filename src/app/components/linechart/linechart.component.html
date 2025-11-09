@@ -99,10 +99,11 @@
 
         <!-- Kuvvet -->
         <div>
-          <div class="section-toggle" (click)="openOnlyRegion('Force')">
-            <span>Kuvvet filtresi</span>
-            <span class="chev" [class.open]="openForce">▾</span>
-          </div>
+         <div class="section-toggle" (click)="toggleRow('Force')">
+          <span>Kuvvet filtresi</span>
+          <span class="chev" [class.open]="openForce">▾</span>
+        </div>
+
           <div class="collapsible" [class.open]="openForce">
             <div class="search-row">
               <input type="text" placeholder="Kuvvet ara..." [(ngModel)]="forceSearch" class="searchbox small">
@@ -122,12 +123,13 @@
           </div>
         </div>
 
-        <!-- Rütbe -->
+        <!-- Rütbe///////////////////////////// -->
         <div>
-          <div class="section-toggle" (click)="openOnlyRegion('Rank')">
-            <span>Rütbe filtresi</span>
-            <span class="chev" [class.open]="openRank">▾</span>
-          </div>
+         <div class="section-toggle" (click)="toggleRow('Rank')">
+          <span>Rütbe filtresi</span>
+          <span class="chev" [class.open]="openRank">▾</span>
+        </div>
+
           <div class="collapsible" [class.open]="openRank">
             <div class="search-row">
               <input type="text" placeholder="Rütbe ara..." [(ngModel)]="rankSearch" class="searchbox small">

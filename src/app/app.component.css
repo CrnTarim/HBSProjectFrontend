@@ -1,0 +1,66 @@
+/* Genel düzen */
+.wrapper {
+  display: flex;
+  align-items: flex-start;
+  transition: all 0.3s ease;
+}
+
+/* Sidebar */
+#sidebar {
+  min-width: 250px;
+  max-width: 250px;
+  height: calc(100vh - 56px);
+  background: #343a40;
+  position: fixed;
+  top: 56px;
+  left: 0;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+/* İçerik */
+#content {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  margin-top: 56px;
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 56px);
+  transition: all 0.3s ease;
+}
+
+/* Sidebar collapse olduğunda */
+.wrapper.collapsed #sidebar {
+  margin-left: -250px;
+}
+
+.wrapper.collapsed #content {
+  margin-left: 0;
+  width: 100%;
+}
+
+/* Sidebar içi */
+#sidebar ul.components {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+#sidebar ul li a {
+  display: block;
+  padding: 10px 15px;
+  color: white;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+#sidebar ul li a:hover {
+  background: #495057;
+  text-decoration: none;
+}
+
+/* Dropdown ok animasyonu */
+.rotate {
+  transform: rotate(180deg);
+  transition: transform 0.3s ease;
+}

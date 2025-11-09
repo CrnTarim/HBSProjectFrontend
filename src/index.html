@@ -12,3 +12,37 @@
   <app-root></app-root>
 </body>
 </html>
+<div class="wrapper">
+  <!-- Sol Sidebar -->
+  <nav id="sidebar" class="bg-dark">
+    <div class="sidebar-header text-white p-3">
+      <h5>Menü</h5>
+    </div>
+    <ul class="list-unstyled components">
+      <li>
+        <a href="#definitionsSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle text-white">
+          Tanımlar
+        </a>
+        <ul class="collapse list-unstyled" id="definitionsSubmenu">
+          <li><a routerLink="/definitions/hospitals" class="text-white pl-4">Hastane Tanımları</a></li>
+          <li><a routerLink="/definitions/ranks" class="text-white pl-4">Rütbe Tanımları</a></li>
+          <li><a routerLink="/definitions/forces" class="text-white pl-4">Kuvvet Tanımları</a></li>
+        </ul>
+      </li>
+      <li><a routerLink="/stats" class="text-white">İstatistik</a></li>
+      <li><a routerLink="/reports" class="text-white">Raporlar</a></li>
+    </ul>
+  </nav>
+
+  <!-- Sağ İçerik -->
+  <div id="content">
+    <nav class="navbar navbar-light bg-light">
+      <span class="navbar-brand mb-0 h1">MusicShop Yönetim Paneli</span>
+    </nav>
+
+    <div class="container-fluid mt-3">
+      <!-- Burada yönlendirme ile gelen component'ler görünür -->
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

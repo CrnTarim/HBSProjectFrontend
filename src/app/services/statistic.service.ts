@@ -1,12 +1,12 @@
-import { ApproverDto, DatetimeInput, ForceDto, RankDto, ReviewerDto } from './../models/definition';
+import { ApproverDto, DatetimeInput, ForceDto, RankDto, ReviewerDto } from '../models/statistic';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CityDto, DiagnosisDto, FactReport, HCDecisionDto, HospitalDto } from '../models/definition';
+import { CityDto, DiagnosisDto, FactReport, HCDecisionDto, HospitalDto } from '../models/statistic';
 
 @Injectable({ providedIn: 'root' })
-export class DefinitionService {
-  private url = 'https://localhost:7151/api/Definition';
+export class StatisticService {
+  private url = 'https://localhost:7151/api/Statistic';
 
   constructor(private http: HttpClient) {}
 

@@ -5,7 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SingerSearchPipe } from './pipe/singer-search.pipe';
 import { OrderByPipe } from './pipe/order-by.pipe';
 import { StoreModule } from '@ngrx/store';
@@ -16,12 +16,14 @@ import { UserComponent } from './components/user/user.component';
 import { LoginComponent } from './components/login/login.component';
 
 import { MessageComponent } from './components/message/message.component';
-import { DxSelectBoxModule, DxDataGridModule, DxListModule, DxTextBoxModule, DxTagBoxModule, DxButtonModule, DxPieChartModule, DxPivotGridModule } from 'devextreme-angular';
+import { DxSelectBoxModule, DxDataGridModule, DxListModule, DxTextBoxModule, DxTagBoxModule, DxButtonModule, DxPieChartModule, DxPivotGridModule, DxPopupModule } from 'devextreme-angular';
 import { PersonComponent } from './components/person/person.component';
 
 import { ReportComponent } from './components/report/report.component';
 import { ReportgridComponent } from './components/reportgrid/reportgrid.component';
 import { LinechartComponent } from './components/linechart/linechart.component';
+import { DefinitionsComponent } from './components/definitions/definitions.component';
+import { RankComponent } from './components/definitions/rank/rank.component';
 
 // ng g pipe/singerSearch dedigimiz icin otomatik olusturuldu
 
@@ -37,7 +39,9 @@ import { LinechartComponent } from './components/linechart/linechart.component';
     PersonComponent,
     ReportComponent,
     ReportgridComponent,
-    LinechartComponent ,
+    LinechartComponent,
+    DefinitionsComponent,
+    RankComponent ,
     
   ],
   imports: [
@@ -59,7 +63,9 @@ import { LinechartComponent } from './components/linechart/linechart.component';
     DxButtonModule,
     DxPieChartModule,
     DxPieChartModule,
-    DxPivotGridModule, 
+    DxPivotGridModule,
+    DxPopupModule, 
+    ReactiveFormsModule,
     StoreModule.forRoot({activeSingleSong:singlesongReducer})
  
   

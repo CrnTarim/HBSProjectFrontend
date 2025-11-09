@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { DefinitionService } from './statistic.service';
+import { HosdefinitionService } from './hosdefinition.service';
 
-describe('DefinitionService', () => {
-  let service: DefinitionService;
+describe('HosdefinitionService', () => {
+  let service: HosdefinitionService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(DefinitionService);
+    service = TestBed.inject(HosdefinitionService);
   });
 
   it('should be created', () => {

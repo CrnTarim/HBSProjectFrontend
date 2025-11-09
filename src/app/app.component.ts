@@ -38,7 +38,15 @@ export class AppComponent {
     }
   }
   
-  
-  
+definitionsOpen = false;
+  sidebarCollapsed = false;
+
+  toggleDefinitions() {
+    this.definitionsOpen = !this.definitionsOpen;
+  }
+
+  toggleSidebar() {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
   
 }
