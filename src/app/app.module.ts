@@ -24,6 +24,7 @@ import { ReportgridComponent } from './components/reportgrid/reportgrid.componen
 import { LinechartComponent } from './components/linechart/linechart.component';
 import { DefinitionsComponent } from './components/definitions/definitions.component';
 import { RankComponent } from './components/definitions/rank/rank.component';
+import { HospitalComponent } from './components/definitions/hospital/hospital.component';
 
 // ng g pipe/singerSearch dedigimiz icin otomatik olusturuldu
 
@@ -41,7 +42,8 @@ import { RankComponent } from './components/definitions/rank/rank.component';
     ReportgridComponent,
     LinechartComponent,
     DefinitionsComponent,
-    RankComponent ,
+    RankComponent,
+    HospitalComponent ,
     
   ],
   imports: [

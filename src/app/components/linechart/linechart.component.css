@@ -119,6 +119,11 @@ button.on {
   font-weight: 600;
   color: #262f43;
 }
+.section-toggle.active {
+  background: #f1e9c9 !important;
+  border-color: #f0e7c7 !important;
+  color: #1e1c1c !important;
+}
 
 .chev {
   transition: transform .2s ease;

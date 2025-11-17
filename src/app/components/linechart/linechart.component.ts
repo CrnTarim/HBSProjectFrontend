@@ -433,70 +433,139 @@ export class LinechartComponent implements OnInit {
   }
 
   /* ================== FİLTRE & AĞIRLIKLANDIRMA ================== */
-  private applyFilters(initial = false): void {
-    // Seçili tanı ID → kod seti
-    const selectedDiagCodes = new Set(
-      this.diagnoses
-        .filter(d => this.selectedDiagnosisIds.indexOf(String(d.id)) !== -1)
-        .map(d => String(d.code))
-    );
+  // private applyFilters(initial = false): void {
+  //   // Seçili tanı ID → kod seti
+  //   const selectedDiagCodes = new Set(
+  //     this.diagnoses
+  //       .filter(d => this.selectedDiagnosisIds.indexOf(String(d.id)) !== -1)
+  //       .map(d => String(d.code))
+  //   );
 
-    const diagnosisInColumns = this.columnOrder.indexOf('Diagnosis') !== -1;
+  //   const diagnosisInColumns = this.columnOrder.indexOf('Diagnosis') !== -1;
 
-    let prepared: FactRow[] = [];
+  //   let prepared: FactRow[] = [];
 
-    for (let idx = 0; idx < this.factAll.length; idx++) {
-      const r = this.factAll[idx];
-      const reportCodesSet = new Set(this._codes(r.diagnosisCodesCsv));
-      const reportCodesArr = Array.from(reportCodesSet);
+  //   for (let idx = 0; idx < this.factAll.length; idx++) {
+  //     const r = this.factAll[idx];
+  //     const reportCodesSet = new Set(this._codes(r.diagnosisCodesCsv));
+  //     const reportCodesArr = Array.from(reportCodesSet);
 
-      if (diagnosisInColumns) {
-        const targetCodes = selectedDiagCodes.size
-          ? reportCodesArr.filter(code => selectedDiagCodes.has(code))
-          : reportCodesArr;
+  //     if (diagnosisInColumns) {
+  //       const targetCodes = selectedDiagCodes.size
+  //         ? reportCodesArr.filter(code => selectedDiagCodes.has(code))
+  //         : reportCodesArr;
 
-        if (targetCodes.length > 0) {
-          const w = 1 / targetCodes.length;
-          for (let j = 0; j < targetCodes.length; j++) {
-            prepared.push(Object.assign({}, r, { diagSingle: targetCodes[j], w }));
-          }
+  //       if (targetCodes.length > 0) {
+  //         const w = 1 / targetCodes.length;
+  //         for (let j = 0; j < targetCodes.length; j++) {
+  //           prepared.push(Object.assign({}, r, { diagSingle: targetCodes[j], w }));
+  //         }
+  //       }
+  //     } else {
+  //       prepared.push(Object.assign({}, r, { w: 1 }));
+  //     }
+  //   }
+
+  //   // Diğer slicer filtreleri SENİN MEVCUT AKIŞINDA olduğu gibi burada kalabilir
+  //   const selCity     = new Set(this.selectedCityIds.map(String));
+  //   const selHosp     = new Set(this.selectedHospitalIds.map(String));
+  //   const selState    = new Set(this.selectedStates.map(String));
+  //   const selIssuer   = new Set(this.selectedIssuers.map(String));
+  //   const selDecision = new Set(this.selectedDecisionIds.map(String));
+  //   const selRankName = new Set(this.selectedRankNames.map(String));
+  //   const selForce    = new Set(this.selectedForceIds.map(String));
+
+  //   const filtered = prepared.filter(r => {
+  //     if (selIssuer.size   && !selIssuer.has(String(r.issuer))) return false;
+  //     if (selCity.size     && !selCity.has(String(r.cityId))) return false;
+  //     if (selHosp.size     && !selHosp.has(String(r.hospitalId))) return false;
+  //     if (selRankName.size && (!r.rankName || !selRankName.has(String(r.rankName)))) return false;
+  //     if (selForce.size    && (!r.forceId || !selForce.has(String(r.forceId)))) return false;
+  //     if (selState.size    && !selState.has(String(r.reportStateName))) return false;
+  //     if (selDecision.size && (!r.decisionId || !selDecision.has(String(r.decisionId)))) return false;
+  //     return true;
+  //   });
+
+  //   // ---- güncelle + reload ----
+  //   if (this.pivotDs && !initial) {
+  //     this.factActive.splice(0, this.factActive.length, ...filtered);
+  //     this.recomputeActiveCount();
+  //     this.pivotDs.reload();
+  //   } else {
+  //     this.factActive = filtered;
+  //     this.recomputeActiveCount();
+  //     this.updatePivot();
+  //   }
+  // }
+private applyFilters(initial = false): void {
+  // ---- 1) Tanı çoğaltma / ağırlık ----
+  const selectedDiagCodes = new Set(
+    this.diagnoses
+      .filter(d => this.selectedDiagnosisIds.indexOf(String(d.id)) !== -1)
+      .map(d => String(d.code))
+  );
+  const diagnosisInColumns = this.columnOrder.indexOf('Diagnosis') !== -1;
+
+  let prepared: FactRow[] = [];
+  for (let i = 0; i < this.factAll.length; i++) {
+    const r = this.factAll[i];
+    const reportCodesArr = Array.from(new Set(this._codes(r.diagnosisCodesCsv)));
+
+    if (diagnosisInColumns) {
+      const target = this.selectedDiagnosisIds.length > 0
+        ? reportCodesArr.filter(c => selectedDiagCodes.has(c))
+        : reportCodesArr;
+
+      if (target.length > 0) {
+        const w = 1 / target.length;
+        for (let j = 0; j < target.length; j++) {
+          prepared.push({ ...(r as any), diagSingle: target[j], w });
         }
-      } else {
-        prepared.push(Object.assign({}, r, { w: 1 }));
       }
-    }
-
-    // Diğer slicer filtreleri SENİN MEVCUT AKIŞINDA olduğu gibi burada kalabilir
-    const selCity     = new Set(this.selectedCityIds.map(String));
-    const selHosp     = new Set(this.selectedHospitalIds.map(String));
-    const selState    = new Set(this.selectedStates.map(String));
-    const selIssuer   = new Set(this.selectedIssuers.map(String));
-    const selDecision = new Set(this.selectedDecisionIds.map(String));
-    const selRankName = new Set(this.selectedRankNames.map(String));
-    const selForce    = new Set(this.selectedForceIds.map(String));
-
-    const filtered = prepared.filter(r => {
-      if (selIssuer.size   && !selIssuer.has(String(r.issuer))) return false;
-      if (selCity.size     && !selCity.has(String(r.cityId))) return false;
-      if (selHosp.size     && !selHosp.has(String(r.hospitalId))) return false;
-      if (selRankName.size && (!r.rankName || !selRankName.has(String(r.rankName)))) return false;
-      if (selForce.size    && (!r.forceId || !selForce.has(String(r.forceId)))) return false;
-      if (selState.size    && !selState.has(String(r.reportStateName))) return false;
-      if (selDecision.size && (!r.decisionId || !selDecision.has(String(r.decisionId)))) return false;
-      return true;
-    });
-
-    // ---- güncelle + reload ----
-    if (this.pivotDs && !initial) {
-      this.factActive.splice(0, this.factActive.length, ...filtered);
-      this.recomputeActiveCount();
-      this.pivotDs.reload();
     } else {
-      this.factActive = filtered;
-      this.recomputeActiveCount();
-      this.updatePivot();
+      prepared.push({ ...(r as any), w: 1 });
     }
   }
+
+  // ---- 2) ETKİN setler (Bölge: pil AÇIK **ve** seçim VAR; Kriter: seçim VAR) ----
+  const eff = <T>(arr: T[]) =>
+    (arr && arr.length > 0) ? new Set(arr.map(x => String(x))) : null;
+
+  // Bölge filtreleri PİL'e bağlı (kapalıysa tamamen devre dışı)
+  const selCity     = (this.rowSelected.City     ? eff(this.selectedCityIds)      : null);
+  const selHosp     = (this.rowSelected.Hospital ? eff(this.selectedHospitalIds)  : null);
+  const selIssuer   = (this.rowSelected.Issuer   ? eff(this.selectedIssuers)      : null);
+  const selRankName = (this.rowSelected.Rank     ? eff(this.selectedRankNames)    : null);
+  const selForce    = (this.rowSelected.Force    ? eff(this.selectedForceIds)     : null);
+
+  // Kriterlerde pil yok: yalnızca seçim varsa uygula
+  const selState    = eff(this.selectedStates);
+  const selDecision = eff(this.selectedDecisionIds);
+
+  // ---- 3) Filtreleme (yalnız ETKİN setler uygular) ----
+  const filtered = prepared.filter(r => {
+    if (selIssuer   && !selIssuer.has(String(r.issuer))) return false;
+    if (selCity     && !selCity.has(String(r.cityId))) return false;
+    if (selHosp     && !selHosp.has(String(r.hospitalId))) return false;
+    if (selRankName && (!r.rankName || !selRankName.has(String(r.rankName)))) return false;
+    if (selForce    && (!r.forceId || !selForce.has(String(r.forceId)))) return false;
+
+    if (selState    && !selState.has(String(r.reportStateName))) return false;
+    if (selDecision && (!r.decisionId || !selDecision.has(String(r.decisionId)))) return false;
+    return true;
+  });
+
+  // ---- 4) Güncelle + reload ----
+  if (this.pivotDs && !initial) {
+    this.factActive.splice(0, this.factActive.length, ...filtered);
+    this.recomputeActiveCount();
+    this.pivotDs.reload();
+  } else {
+    this.factActive = filtered;
+    this.recomputeActiveCount();
+    this.updatePivot();
+  }
+}
 
   private recomputeActiveCount(){
     const set = new Set<string>();

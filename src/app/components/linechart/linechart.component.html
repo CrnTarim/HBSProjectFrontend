@@ -48,10 +48,14 @@
 
         <!-- Şehir -->
         <div>
-          <div class="section-toggle" (click)="openOnlyRegion('City')">
-            <span>Şehir filtresi</span>
-            <span class="chev" [class.open]="openCity">▾</span>
-          </div>
+          <!-- örnek: Şehir -->
+<div class="section-toggle"
+     [class.on]="rowSelected.City && selectedCityIds.length > 0"
+     (click)="toggleRow('City')">
+  <span>Şehir filtresi</span>
+  <span class="chev" [class.open]="openCity">▾</span>
+</div>
+
           <div class="collapsible" [class.open]="openCity">
             <div class="search-row">
               <input type="text" placeholder="Şehir ara..." [(ngModel)]="citySearch" class="searchbox small">
@@ -99,7 +103,7 @@
 
         <!-- Kuvvet -->
         <div>
-         <div class="section-toggle" (click)="toggleRow('Force')">
+         <div class="section-toggle" (click)="openOnlyRegion('Force')">
           <span>Kuvvet filtresi</span>
           <span class="chev" [class.open]="openForce">▾</span>
         </div>
@@ -125,7 +129,7 @@
 
         <!-- Rütbe///////////////////////////// -->
         <div>
-         <div class="section-toggle" (click)="toggleRow('Rank')">
+         <div class="section-toggle" (click)="openOnlyRegion('Rank')">
           <span>Rütbe filtresi</span>
           <span class="chev" [class.open]="openRank">▾</span>
         </div>
