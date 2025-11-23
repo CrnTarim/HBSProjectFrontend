@@ -279,17 +279,144 @@ export class LinechartComponent implements OnInit {
     const i = arr.indexOf(v);
     return i >= 0 ? (arr.filter(x => x !== v) as any) : arr.concat(v);
   }
+private ensureColumn(kind: ColumnKey) {
+ const idx = this.columnOrder.indexOf(kind);
+ if (idx === -1) {
+  if (this.columnOrder.length === 3) {
+   this.columnOrder.shift();
+  }
+  this.columnOrder.push(kind);
+ }
+}
+
+private removeColumn(kind: ColumnKey) {
+ const idx = this.columnOrder.indexOf(kind);
+ if (idx !== -1) {
+  this.columnOrder.splice(idx, 1);
+ }
+}
+
+private ensureRow(kind: 'Issuer' | 'City' | 'Hospital' | 'Rank' | 'Force') {
+  (this.rowSelected as any)[kind] = true;
+}
+
+private removeRow(kind: 'Issuer' | 'City' | 'Hospital' | 'Rank' | 'Force') {
+  (this.rowSelected as any)[kind] = false;
+}
 
   /* ================== TOGGLES ================== */
-  toggleCity(id: any)       { this.selectedCityIds      = this.toggleIn(this.selectedCityIds, id);       this.applyFilters(); }
-  toggleHospital(id: any)   { this.selectedHospitalIds  = this.toggleIn(this.selectedHospitalIds, id);   this.applyFilters(); }
-  toggleDiagnosis(id: any)  { this.selectedDiagnosisIds = this.toggleIn(this.selectedDiagnosisIds, id);  this.applyFilters(true); }
-  toggleDecision(id: any)   { this.selectedDecisionIds  = this.toggleIn(this.selectedDecisionIds, id);   this.applyFilters(); }
-  toggleState(name: string) { this.selectedStates       = this.toggleIn(this.selectedStates, name);      this.applyFilters(); }
-  toggleIssuer(name: Issuer){ this.selectedIssuers      = this.toggleIn(this.selectedIssuers, name);     this.applyFilters(); }
-  /** Rütbe artık İSİM ile seçiliyor */
-  toggleRank(name: string)  { this.selectedRankNames    = this.toggleIn(this.selectedRankNames, name);   this.applyFilters(); }
-  toggleForce(id: any)      { this.selectedForceIds     = this.toggleIn(this.selectedForceIds, id);      this.applyFilters(); }
+  // toggleCity(id: any)       { this.selectedCityIds      = this.toggleIn(this.selectedCityIds, id);       this.applyFilters(); }
+  // toggleHospital(id: any)   { this.selectedHospitalIds  = this.toggleIn(this.selectedHospitalIds, id);   this.applyFilters(); }
+  // // toggleDiagnosis(id: any)  { this.selectedDiagnosisIds = this.toggleIn(this.selectedDiagnosisIds, id);  this.applyFilters(true); }
+  // // toggleDecision(id: any)   { this.selectedDecisionIds  = this.toggleIn(this.selectedDecisionIds, id);   this.applyFilters(); }
+  // // toggleState(name: string) { this.selectedStates       = this.toggleIn(this.selectedStates, name);      this.applyFilters(); }
+  // toggleIssuer(name: Issuer){ this.selectedIssuers      = this.toggleIn(this.selectedIssuers, name);     this.applyFilters(); }
+  // /** Rütbe artık İSİM ile seçiliyor */
+  // toggleRank(name: string)  { this.selectedRankNames    = this.toggleIn(this.selectedRankNames, name);   this.applyFilters(); }
+  // toggleForce(id: any)      { this.selectedForceIds     = this.toggleIn(this.selectedForceIds, id);      this.applyFilters(); }
+// toggleCity(id: any)       { this.selectedCityIds      = this.toggleIn(this.selectedCityIds, id);       this.applyFilters(); }
+// toggleHospital(id: any)   { this.selectedHospitalIds  = this.toggleIn(this.selectedHospitalIds, id);   this.applyFilters(); }
+// toggleForce(id: any)      { this.selectedForceIds     = this.toggleIn(this.selectedForceIds, id);      this.applyFilters(); }
+// toggleRank(name: string)  { this.selectedRankNames    = this.toggleIn(this.selectedRankNames, name);   this.applyFilters(); }
+// toggleIssuer(name: Issuer){ this.selectedIssuers      = this.toggleIn(this.selectedIssuers, name);     this.applyFilters(); }
+
+toggleCity(id: any)  {
+  this.selectedCityIds = this.toggleIn(this.selectedCityIds, id);
+
+  if (this.selectedCityIds.length > 0) {
+    this.ensureRow('City');
+  } else {
+    this.removeRow('City');
+  }
+
+  this.applyFilters();
+}
+
+toggleHospital(id: any) {
+  this.selectedHospitalIds = this.toggleIn(this.selectedHospitalIds, id);
+
+  if (this.selectedHospitalIds.length > 0) {
+    this.ensureRow('Hospital');
+  } else {
+    this.removeRow('Hospital');
+  }
+
+  this.applyFilters();
+}
+
+toggleForce(id: any) {
+  this.selectedForceIds = this.toggleIn(this.selectedForceIds, id);
+
+  if (this.selectedForceIds.length > 0) {
+    this.ensureRow('Force');
+  } else {
+    this.removeRow('Force');
+  }
+
+  this.applyFilters();
+}
+
+/** Rütbe isimle */
+toggleRank(name: string) {
+  this.selectedRankNames = this.toggleIn(this.selectedRankNames, name);
+
+  if (this.selectedRankNames.length > 0) {
+    this.ensureRow('Rank');
+  } else {
+    this.removeRow('Rank');
+  }
+
+  this.applyFilters();
+}
+
+toggleIssuer(name: Issuer) {
+  this.selectedIssuers = this.toggleIn(this.selectedIssuers, name);
+
+  if (this.selectedIssuers.length > 0) {
+    this.ensureRow('Issuer');
+  } else {
+    this.removeRow('Issuer');
+  }
+
+  this.applyFilters();
+}
+
+
+  toggleDiagnosis(id: any)  {
+  this.selectedDiagnosisIds = this.toggleIn(this.selectedDiagnosisIds, id);
+
+  if (this.selectedDiagnosisIds.length > 0) {
+    this.ensureColumn('Diagnosis');
+  } else {
+    this.removeColumn('Diagnosis');
+  }
+
+  this.applyFilters(true);   // tanı ağırlığı değiştiği için
+}
+
+toggleState(name: string) {
+  this.selectedStates = this.toggleIn(this.selectedStates, name);
+
+  if (this.selectedStates.length > 0) {
+    this.ensureColumn('ReportState');
+  } else {
+    this.removeColumn('ReportState');
+  }
+
+  this.applyFilters();
+}
+
+toggleDecision(id: any) {
+  this.selectedDecisionIds = this.toggleIn(this.selectedDecisionIds, id);
+
+  if (this.selectedDecisionIds.length > 0) {
+    this.ensureColumn('Decision');
+  } else {
+    this.removeColumn('Decision');
+  }
+
+  this.applyFilters();
+}
 
   /* ================== PANEL AÇ/KAPA ================== */
   openOnlyRegion(which: 'City' | 'Hospital' | 'Issuer' | 'Rank' | 'Force') {
@@ -433,139 +560,64 @@ export class LinechartComponent implements OnInit {
   }
 
   /* ================== FİLTRE & AĞIRLIKLANDIRMA ================== */
-  // private applyFilters(initial = false): void {
-  //   // Seçili tanı ID → kod seti
-  //   const selectedDiagCodes = new Set(
-  //     this.diagnoses
-  //       .filter(d => this.selectedDiagnosisIds.indexOf(String(d.id)) !== -1)
-  //       .map(d => String(d.code))
-  //   );
+  private applyFilters(initial = false): void {
+    // Seçili tanı ID → kod seti
+    const selectedDiagCodes = new Set(
+      this.diagnoses
+        .filter(d => this.selectedDiagnosisIds.indexOf(String(d.id)) !== -1)
+        .map(d => String(d.code))
+    );
 
-  //   const diagnosisInColumns = this.columnOrder.indexOf('Diagnosis') !== -1;
+    const diagnosisInColumns = this.columnOrder.indexOf('Diagnosis') !== -1;
 
-  //   let prepared: FactRow[] = [];
+    let prepared: FactRow[] = [];
 
-  //   for (let idx = 0; idx < this.factAll.length; idx++) {
-  //     const r = this.factAll[idx];
-  //     const reportCodesSet = new Set(this._codes(r.diagnosisCodesCsv));
-  //     const reportCodesArr = Array.from(reportCodesSet);
+    for (let idx = 0; idx < this.factAll.length; idx++) {
+      const r = this.factAll[idx];
+      const reportCodesSet = new Set(this._codes(r.diagnosisCodesCsv));
+      const reportCodesArr = Array.from(reportCodesSet);
 
-  //     if (diagnosisInColumns) {
-  //       const targetCodes = selectedDiagCodes.size
-  //         ? reportCodesArr.filter(code => selectedDiagCodes.has(code))
-  //         : reportCodesArr;
+      if (diagnosisInColumns) {
+        const targetCodes = selectedDiagCodes.size
+          ? reportCodesArr.filter(code => selectedDiagCodes.has(code))
+          : reportCodesArr;
 
-  //       if (targetCodes.length > 0) {
-  //         const w = 1 / targetCodes.length;
-  //         for (let j = 0; j < targetCodes.length; j++) {
-  //           prepared.push(Object.assign({}, r, { diagSingle: targetCodes[j], w }));
-  //         }
-  //       }
-  //     } else {
-  //       prepared.push(Object.assign({}, r, { w: 1 }));
-  //     }
-  //   }
-
-  //   // Diğer slicer filtreleri SENİN MEVCUT AKIŞINDA olduğu gibi burada kalabilir
-  //   const selCity     = new Set(this.selectedCityIds.map(String));
-  //   const selHosp     = new Set(this.selectedHospitalIds.map(String));
-  //   const selState    = new Set(this.selectedStates.map(String));
-  //   const selIssuer   = new Set(this.selectedIssuers.map(String));
-  //   const selDecision = new Set(this.selectedDecisionIds.map(String));
-  //   const selRankName = new Set(this.selectedRankNames.map(String));
-  //   const selForce    = new Set(this.selectedForceIds.map(String));
-
-  //   const filtered = prepared.filter(r => {
-  //     if (selIssuer.size   && !selIssuer.has(String(r.issuer))) return false;
-  //     if (selCity.size     && !selCity.has(String(r.cityId))) return false;
-  //     if (selHosp.size     && !selHosp.has(String(r.hospitalId))) return false;
-  //     if (selRankName.size && (!r.rankName || !selRankName.has(String(r.rankName)))) return false;
-  //     if (selForce.size    && (!r.forceId || !selForce.has(String(r.forceId)))) return false;
-  //     if (selState.size    && !selState.has(String(r.reportStateName))) return false;
-  //     if (selDecision.size && (!r.decisionId || !selDecision.has(String(r.decisionId)))) return false;
-  //     return true;
-  //   });
-
-  //   // ---- güncelle + reload ----
-  //   if (this.pivotDs && !initial) {
-  //     this.factActive.splice(0, this.factActive.length, ...filtered);
-  //     this.recomputeActiveCount();
-  //     this.pivotDs.reload();
-  //   } else {
-  //     this.factActive = filtered;
-  //     this.recomputeActiveCount();
-  //     this.updatePivot();
-  //   }
-  // }
-private applyFilters(initial = false): void {
-  // ---- 1) Tanı çoğaltma / ağırlık ----
-  const selectedDiagCodes = new Set(
-    this.diagnoses
-      .filter(d => this.selectedDiagnosisIds.indexOf(String(d.id)) !== -1)
-      .map(d => String(d.code))
-  );
-  const diagnosisInColumns = this.columnOrder.indexOf('Diagnosis') !== -1;
-
-  let prepared: FactRow[] = [];
-  for (let i = 0; i < this.factAll.length; i++) {
-    const r = this.factAll[i];
-    const reportCodesArr = Array.from(new Set(this._codes(r.diagnosisCodesCsv)));
-
-    if (diagnosisInColumns) {
-      const target = this.selectedDiagnosisIds.length > 0
-        ? reportCodesArr.filter(c => selectedDiagCodes.has(c))
-        : reportCodesArr;
-
-      if (target.length > 0) {
-        const w = 1 / target.length;
-        for (let j = 0; j < target.length; j++) {
-          prepared.push({ ...(r as any), diagSingle: target[j], w });
+        if (targetCodes.length > 0) {
+          const w = 1 / targetCodes.length;
+          for (let j = 0; j < targetCodes.length; j++) {
+            prepared.push(Object.assign({}, r, { diagSingle: targetCodes[j], w }));
+          }
         }
+      } else {
+        prepared.push(Object.assign({}, r, { w: 1 }));
       }
-    } else {
-      prepared.push({ ...(r as any), w: 1 });
     }
-  }
 
-  // ---- 2) ETKİN setler (Bölge: pil AÇIK **ve** seçim VAR; Kriter: seçim VAR) ----
-  const eff = <T>(arr: T[]) =>
-    (arr && arr.length > 0) ? new Set(arr.map(x => String(x))) : null;
+    // Diğer slicer filtreleri SENİN MEVCUT AKIŞINDA olduğu gibi burada kalabilir
+    const selCity     = new Set(this.selectedCityIds.map(String));
+    const selHosp     = new Set(this.selectedHospitalIds.map(String));
+    const selState    = new Set(this.selectedStates.map(String));
+    const selIssuer   = new Set(this.selectedIssuers.map(String));
+    const selDecision = new Set(this.selectedDecisionIds.map(String));
+    const selRankName = new Set(this.selectedRankNames.map(String));
+    const selForce    = new Set(this.selectedForceIds.map(String));
 
-  // Bölge filtreleri PİL'e bağlı (kapalıysa tamamen devre dışı)
-  const selCity     = (this.rowSelected.City     ? eff(this.selectedCityIds)      : null);
-  const selHosp     = (this.rowSelected.Hospital ? eff(this.selectedHospitalIds)  : null);
-  const selIssuer   = (this.rowSelected.Issuer   ? eff(this.selectedIssuers)      : null);
-  const selRankName = (this.rowSelected.Rank     ? eff(this.selectedRankNames)    : null);
-  const selForce    = (this.rowSelected.Force    ? eff(this.selectedForceIds)     : null);
+    const filtered = prepared.filter(r => {
+      if (selIssuer.size   && !selIssuer.has(String(r.issuer))) return false;
+      if (selCity.size     && !selCity.has(String(r.cityId))) return false;
+      if (selHosp.size     && !selHosp.has(String(r.hospitalId))) return false;
+      if (selRankName.size && (!r.rankName || !selRankName.has(String(r.rankName)))) return false;
+      if (selForce.size    && (!r.forceId || !selForce.has(String(r.forceId)))) return false;
+      if (selState.size    && !selState.has(String(r.reportStateName))) return false;
+      if (selDecision.size && (!r.decisionId || !selDecision.has(String(r.decisionId)))) return false;
+      return true;
+    });
 
-  // Kriterlerde pil yok: yalnızca seçim varsa uygula
-  const selState    = eff(this.selectedStates);
-  const selDecision = eff(this.selectedDecisionIds);
-
-  // ---- 3) Filtreleme (yalnız ETKİN setler uygular) ----
-  const filtered = prepared.filter(r => {
-    if (selIssuer   && !selIssuer.has(String(r.issuer))) return false;
-    if (selCity     && !selCity.has(String(r.cityId))) return false;
-    if (selHosp     && !selHosp.has(String(r.hospitalId))) return false;
-    if (selRankName && (!r.rankName || !selRankName.has(String(r.rankName)))) return false;
-    if (selForce    && (!r.forceId || !selForce.has(String(r.forceId)))) return false;
-
-    if (selState    && !selState.has(String(r.reportStateName))) return false;
-    if (selDecision && (!r.decisionId || !selDecision.has(String(r.decisionId)))) return false;
-    return true;
-  });
-
-  // ---- 4) Güncelle + reload ----
-  if (this.pivotDs && !initial) {
-    this.factActive.splice(0, this.factActive.length, ...filtered);
-    this.recomputeActiveCount();
-    this.pivotDs.reload();
-  } else {
+    // ---- güncelle + reload ----
     this.factActive = filtered;
-    this.recomputeActiveCount();
-    this.updatePivot();
+ this.recomputeActiveCount();
+ this.updatePivot();
   }
-}
 
   private recomputeActiveCount(){
     const set = new Set<string>();
@@ -608,40 +660,173 @@ private applyFilters(initial = false): void {
 
   /* ================== TOPLU SEÇ / TEMİZLE ================== */
   // Şehir
-  selectAllCities(){ this.selectedCityIds = this.citiesFiltered().map(c => String(c.id)); this.applyFilters(); }
-  clearAllCities(){ this.selectedCityIds = []; this.applyFilters(); }
+  // selectAllCities(){ this.selectedCityIds = this.citiesFiltered().map(c => String(c.id)); this.applyFilters(); }
+  // clearAllCities(){ this.selectedCityIds = []; this.applyFilters(); }
 
-  // Hastane (şehre göre daralan liste)
-  selectAllHospitals(){ this.selectedHospitalIds = this.hospitalsForUIFiltered().map(h => String(h.id)); this.applyFilters(); }
-  clearAllHospitals(){ this.selectedHospitalIds = []; this.applyFilters(); }
+  // // Hastane (şehre göre daralan liste)
+  // selectAllHospitals(){ this.selectedHospitalIds = this.hospitalsForUIFiltered().map(h => String(h.id)); this.applyFilters(); }
+  // clearAllHospitals(){ this.selectedHospitalIds = []; this.applyFilters(); }
 
-  // Kuvvet
-  selectAllForces(){ this.selectedForceIds = this.forcesForUIFiltered().map(f => String(f.id)); this.applyFilters(); }
-  clearAllForces(){ this.selectedForceIds = []; this.applyFilters(); }
+  // // Kuvvet
+  // selectAllForces(){ this.selectedForceIds = this.forcesForUIFiltered().map(f => String(f.id)); this.applyFilters(); }
+  // clearAllForces(){ this.selectedForceIds = []; this.applyFilters(); }
 
-  // Rütbe (isimle)
-  selectAllRanks(){ this.selectedRankNames = this.ranksForUIFiltered().map(r => String(r.name)); this.applyFilters(); }
-  clearAllRanks(){ this.selectedRankNames = []; this.applyFilters(); }
+  // // Rütbe (isimle)
+  // selectAllRanks(){ this.selectedRankNames = this.ranksForUIFiltered().map(r => String(r.name)); this.applyFilters(); }
+  // clearAllRanks(){ this.selectedRankNames = []; this.applyFilters(); }
 
-  // Onaylayan
-  selectAllIssuers(){ this.selectedIssuers = this.issuers.slice(); this.applyFilters(); }
-  clearAllIssuers(){ this.selectedIssuers = []; this.applyFilters(); }
+  // // Onaylayan
+  // selectAllIssuers(){ this.selectedIssuers = this.issuers.slice(); this.applyFilters(); }
+  // clearAllIssuers(){ this.selectedIssuers = []; this.applyFilters(); }
 
   // Tanı (ID) — çoğaltma/ağırlık değiştiği için initial=true
-  selectAllDiagnoses(){ this.selectedDiagnosisIds = this.diagnosesFiltered().map(d => String(d.id)); this.applyFilters(true); }
-  clearAllDiagnoses(){ this.selectedDiagnosisIds = []; this.applyFilters(true); }
+//   selectAllDiagnoses(){ this.selectedDiagnosisIds = this.diagnosesFiltered().map(d => String(d.id)); this.applyFilters(true); }
+//   clearAllDiagnoses(){ this.selectedDiagnosisIds = []; this.applyFilters(true); }
 
-  // Durum (EN key)
-  selectAllStates(){ this.selectedStates = this.statesFiltered().slice(); this.applyFilters(); }
-  clearAllStates(){ this.selectedStates = []; this.applyFilters(); }
-  // Karar — toplu seç / temizle
+//   // Durum (EN key)
+//   selectAllStates(){ this.selectedStates = this.statesFiltered().slice(); this.applyFilters(); }
+//   clearAllStates(){ this.selectedStates = []; this.applyFilters(); }
+//   // Karar — toplu seç / temizle
+// selectAllDecisions() {
+//   this.selectedDecisionIds = this.decisionsFiltered().map(k => String(k.id));
+//   this.applyFilters();  // tanıya dokunmadığı için initial=false
+// }
+
+// clearAllDecisions() {
+//   this.selectedDecisionIds = [];
+//   this.applyFilters();
+// }
+
+
+
+selectAllCities() {
+  this.selectedCityIds = this.citiesFiltered().map(c => String(c.id));
+  this.ensureRow('City');
+  this.applyFilters();
+}
+
+clearAllCities() {
+  this.selectedCityIds = [];
+  this.citySearch = '';
+
+  this.removeRow('City');
+  this.openCity = false;
+
+  this.applyFilters();
+}
+
+
+selectAllHospitals() {
+  this.selectedHospitalIds = this.hospitalsForUIFiltered().map(h => String(h.id));
+  this.ensureRow('Hospital');
+  this.applyFilters();
+}
+
+clearAllHospitals() {
+  this.selectedHospitalIds = [];
+  this.hospitalSearch = '';
+
+  this.removeRow('Hospital');
+  this.openHospital = false;
+
+  this.applyFilters();
+}
+
+
+selectAllForces() {
+  this.selectedForceIds = this.forcesForUIFiltered().map(f => String(f.id));
+  this.ensureRow('Force');
+  this.applyFilters();
+}
+
+clearAllForces() {
+  this.selectedForceIds = [];
+  this.forceSearch = '';
+
+  this.removeRow('Force');
+  this.openForce = false;
+
+  this.applyFilters();
+}
+
+
+selectAllRanks() {
+  this.selectedRankNames = this.ranksForUIFiltered().map(r => String(r.name));
+  this.ensureRow('Rank');
+  this.applyFilters();
+}
+
+clearAllRanks() {
+  this.selectedRankNames = [];
+  this.rankSearch = '';
+
+  this.removeRow('Rank');
+  this.openRank = false;
+
+  this.applyFilters();
+}
+
+
+selectAllIssuers() {
+  this.selectedIssuers = this.issuers.slice();
+  this.ensureRow('Issuer');
+  this.applyFilters();
+}
+
+clearAllIssuers() {
+  this.selectedIssuers = [];
+
+  this.removeRow('Issuer');
+  this.openIssuer = false;
+
+  this.applyFilters();
+}
+
+selectAllDiagnoses() {
+  this.selectedDiagnosisIds = this.diagnosesFiltered().map(d => String(d.id));
+  this.ensureColumn('Diagnosis');
+  this.applyFilters(true);
+}
+
+clearAllDiagnoses() {
+  this.selectedDiagnosisIds = [];
+  this.diagnosisSearch = '';
+
+  this.removeColumn('Diagnosis');
+  this.openDiagnosis = false;
+
+  this.applyFilters(true);
+}
+
+selectAllStates() {
+  this.selectedStates = this.statesFiltered().slice();
+  this.ensureColumn('ReportState');
+  this.applyFilters();
+}
+
+clearAllStates() {
+  this.selectedStates = [];
+  this.stateSearch = '';
+
+  this.removeColumn('ReportState');
+  this.openState = false;
+
+  this.applyFilters();
+}
+
 selectAllDecisions() {
   this.selectedDecisionIds = this.decisionsFiltered().map(k => String(k.id));
-  this.applyFilters();  // tanıya dokunmadığı için initial=false
+  this.ensureColumn('Decision');
+  this.applyFilters();
 }
 
 clearAllDecisions() {
   this.selectedDecisionIds = [];
+  this.decisionSearch = '';
+
+  this.removeColumn('Decision');
+  this.openDecision = false;
+
   this.applyFilters();
 }
 

@@ -12,6 +12,8 @@ import { ReportComponent } from './components/report/report.component';
 import { ReportgridComponent } from './components/reportgrid/reportgrid.component';
 import { LinechartComponent } from './components/linechart/linechart.component';
 import { RankComponent } from './components/definitions/rank/rank.component';
+import { HospitalComponent } from './components/definitions/hospital/hospital.component';
+import { CityComponent } from './components/definitions/city/city.component';
 
 const routes: Routes = [
 
@@ -24,13 +26,14 @@ const routes: Routes = [
 
   {path:'user-profile/:id', component: UserComponent, canActivate: [AuthGuard]},
   {path:'message', component: MessageComponent, canActivate: [AuthGuard] },
-
   {path:'person',component:PersonComponent},
- 
   {path:'report',component:ReportComponent},
   {path:'reportgrid',component:ReportgridComponent},
   {path:'statistic',component:LinechartComponent},
-  { path: 'definitions/ranks', component: RankComponent }
+  {path: 'definitions/ranks', component: RankComponent },
+  {path:'definitions/hospitals',component:HospitalComponent},
+    {path:'definitions/city',component:CityComponent},
+
 
   
 ];

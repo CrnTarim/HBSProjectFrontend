@@ -14,3 +14,15 @@ export class Hospital
   cityCode?: number;
   createdDate?: Date;
 }
+
+export class HospitalCodeName
+{
+  code?: number;
+  name?: string;
+}
+
+export class City
+{
+  code?: number;
+  name?: string;
+}

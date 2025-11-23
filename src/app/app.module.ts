@@ -25,6 +25,7 @@ import { LinechartComponent } from './components/linechart/linechart.component';
 import { DefinitionsComponent } from './components/definitions/definitions.component';
 import { RankComponent } from './components/definitions/rank/rank.component';
 import { HospitalComponent } from './components/definitions/hospital/hospital.component';
+import { CityComponent } from './components/definitions/city/city.component';
 
 // ng g pipe/singerSearch dedigimiz icin otomatik olusturuldu
 
@@ -43,7 +44,8 @@ import { HospitalComponent } from './components/definitions/hospital/hospital.co
     LinechartComponent,
     DefinitionsComponent,
     RankComponent,
-    HospitalComponent ,
+    HospitalComponent,
+    CityComponent ,
     
   ],
   imports: [

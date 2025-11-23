@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { HosdefinitionService } from '../../../services/hosdefinition.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Hospital } from '../../../models/definition';
+import { Hospital, HospitalCodeName } from '../../../models/definition';
 import { DxDataGridComponent } from 'devextreme-angular';
 
 @Component({
@@ -12,8 +12,10 @@ import { DxDataGridComponent } from 'devextreme-angular';
 export class HospitalComponent {
 
   hospitals: Hospital[] = [];
+  hospitalcodename:HospitalCodeName[]=[];
   isLoading = true;
   selectedHospital: Hospital| null = null;
+  savemodeHospital=false;
   popupVisible = false;
   hospitalForm!: FormGroup; 
   searchText: string = '';
@@ -28,19 +30,20 @@ constructor(
   ngOnInit(): void {
     //  reactive form
     this.initForm();
-
-    this.getrankdef();
+    this.gethospitaldef();
+    this.gethospitalcities();
+    this.gethospitalcodenames();
   }
 private initForm(): void {
   this.hospitalForm = this.formBuilder.group({
     id: [null],
     code: [null, Validators.required],
     name: ['', Validators.required],
-    citycode: [null, Validators.required]
+    cityCode: [null, Validators.required]
   });
 }
   //  Grid verisi getir
-  getrankdef() {
+  gethospitaldef() {
     this.defService.getHospitals().subscribe({
       next:(data)=>{
         this.hospitals = data;
@@ -53,14 +56,52 @@ private initForm(): void {
     });
   }
 
-  //  Gridde satıra seç
-  onRowSelect(hospital:Hospital)
+  gethospitalcities()
   {
-    this.selectedHospital=hospital;// seçimi tut
-    this.hospitalForm.patchValue(hospital);//seçimi forma ayzdır
+    this.defService.getHospitalCityCodes().subscribe({
+     next:(data)=>{
+        this.citycodes = data;
+       
+      },
+      error: (err) => {
+        console.error('Rank verisi alınamadı', err);
+        this.isLoading = false;
+       }
+    })
+    console.log( this.citycodes);
   }
+
+  gethospitalcodenames()
+  {
+    this.defService.getHospitalCodeName().subscribe({
+      next:(data)=>{
+        this.hospitalcodename=data;},
+        error: (err) => {
+          console.error('Rank verisi alınamadı', err);
+          this.isLoading = false;
+         }
+    })
+  }
+  //  Gridde satıra seç
+  // onRowSelect(hospital:Hospital)
+  // {
+  //   this.selectedHospital=hospital;// seçimi tut
+  //   this.hospitalForm.patchValue(hospital);//seçimi forma ayzdır
+  // }
+  onRowSelect(h: Hospital) {
+  this.selectedHospital = h;
+  this.hospitalForm.patchValue(h);
+  // this.hospitalForm.patchValue({
+  //   id: h.id,
+  //   code: h.code,
+  //   name: h.name,
+  //   cityCode: h.cityCode   
+  // });
+}
+
 //Form temizle
    newHospital() {
+    this.savemodeHospital=true;
     this.selectedHospital = null;
     this.hospitalForm.reset();
     this.clearGridSearch();
@@ -75,10 +116,10 @@ private initForm(): void {
   const id = this.selectedHospital.id;
   this.isLoading = true;
 
-  this.defService.deleteRank(id).subscribe({
+  this.defService.deleteHospital(id).subscribe({
     next: (msg:string) => {
       console.log(msg);    
-      this.getrankdef();
+      this.gethospitaldef();
       this.selectedHospital = null;
       this.hospitalForm.reset();
       this.isLoading = false;
@@ -106,11 +147,19 @@ private initForm(): void {
 
   //Kaydet butonu popup
   openConfirm() {
-    if (this.hospitalForm.invalid) {
-      alert('Lütfen gerekli alanları doldurun.');
-      return;
+    if(this.selectedHospital || this.savemodeHospital)
+    {
+      if (this.hospitalForm.invalid) {
+            alert('Lütfen gerekli alanları doldurun.');
+            return;
+          }
+          this.popupVisible = true;
+    } 
+    else
+    {
+      alert('Lütfen gerekli metot tipini seçin doldurun.');
+            return;
     }
-    this.popupVisible = true;
   }
 
   //  Kaydet onay
@@ -119,10 +168,10 @@ private initForm(): void {
     const hospitalData = this.hospitalForm.value; //formdaki veriyi al
 
     if (!this.selectedHospital) { //seçili bi hastane yok ise
-      this.defService.postRank(hospitalData).subscribe({
+      this.defService.postHospital(hospitalData).subscribe({
         next: (res) => {
           alert('Yeni kayıt başarıyla eklendi!');
-          this.getrankdef();
+          this.gethospitaldef();
           this.newHospital();
         },
         error: (err) => {

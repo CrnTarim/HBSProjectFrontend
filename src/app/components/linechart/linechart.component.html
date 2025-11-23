@@ -31,16 +31,14 @@
     </div>
 
     <!-- Bölge pilleri -->
-    <div class="block">
-      <div class="label">Bölge</div>
-      <div class="pills">
-        <button [class.on]="rowSelected.Issuer"   (click)="toggleRow('Issuer')">Onaylayan</button>
-        <button [class.on]="rowSelected.Force"    (click)="toggleRow('Force')">Kuvvet</button>
-        <button [class.on]="rowSelected.Rank"     (click)="toggleRow('Rank')">Rütbe</button>
-        <button [class.on]="rowSelected.City"     (click)="toggleRow('City')">Şehir</button>
-        <button [class.on]="rowSelected.Hospital" (click)="toggleRow('Hospital')">Hastane</button>
-      </div>
-    </div>
+ <div class="pills">
+  <button [class.on]="rowSelected.Issuer"   (click)="toggleRow('Issuer')">Onaylayan</button>
+  <button [class.on]="rowSelected.Force"    (click)="toggleRow('Force')">Kuvvet</button>
+  <button [class.on]="rowSelected.Rank"     (click)="toggleRow('Rank')">Rütbe</button>
+  <button [class.on]="rowSelected.City"     (click)="toggleRow('City')">Şehir</button>
+  <button [class.on]="rowSelected.Hospital" (click)="toggleRow('Hospital')">Hastane</button>
+</div>
+
 
     <!-- Bölge filtreleri -->
     <div class="block">
@@ -184,19 +182,13 @@
     </div>
 
     <div class="block">
-      <div class="label">Kriter</div>
-      <div class="pills">
-        <button class="with-rank" [class.on]="columnRank('Diagnosis')" (click)="toggleColumn('Diagnosis')">
-          Tanı <span *ngIf="columnRank('Diagnosis')" class="rank">{{ columnRank('Diagnosis') }}</span>
-        </button>
-        <button class="with-rank" [class.on]="columnRank('ReportState')" (click)="toggleColumn('ReportState')">
-          Rapor Durumu <span *ngIf="columnRank('ReportState')" class="rank">{{ columnRank('ReportState') }}</span>
-        </button>
-        <button class="with-rank" [class.on]="columnRank('Decision')" (click)="toggleColumn('Decision')">
-          Karar <span *ngIf="columnRank('Decision')" class="rank">{{ columnRank('Decision') }}</span>
-        </button>
-      </div>
-    </div>
+  <div class="label">Kriter</div>
+  <div class="pills">
+    <button [class.on]="selectedDiagnosisIds.length > 0">Tanı</button>
+    <button [class.on]="selectedStates.length > 0">Rapor Durumu</button>
+    <button [class.on]="selectedDecisionIds.length > 0">Karar</button>
+  </div>
+</div>
 
     <!-- Kriter filtreleri -->
     <div class="block">

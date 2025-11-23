@@ -27,7 +27,7 @@
 
   <!-- 3) Form KARTI (artık full width, flex içinde değil) -->
   <div class="card mt-4 p-3 shadow-sm">
-    <h5>{{ selectedRank ? 'Rütbe Güncelle' : 'Yeni Rütbe Ekle' }}</h5>
+    <h5>{{ selectedRank ? 'Rütbe Güncelle' : newsaveRank?  'Rütbe Yeni Kayıt':  '' }}</h5>
 
     <form [formGroup]="rankForm">
       <div class="form-group mt-2">

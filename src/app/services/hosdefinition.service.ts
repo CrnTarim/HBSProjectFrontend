@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Hospital, Rank } from '../models/definition';
+import { Hospital, HospitalCodeName, Rank } from '../models/definition';
 
 @Injectable({
   providedIn: 'root'
@@ -31,10 +31,25 @@ export class HosdefinitionService {
 
    postHospital(data:Hospital):Observable<Hospital>
    {
-    return this.http.post<Hospital>(`${this.url}/postrank`, data);
+    return this.http.post<Hospital>(`${this.url}/posthospital`, data);
    }
 
     deleteHospital(id: string): Observable<string> {
      return this.http.delete<string>(`${this.url}/deletehospital/${id}`);
-   }
+   }  
+
+  getHospitalCityCodes(): Observable<number[]> {
+    return this.http.get<number[]>(`${this.url}/hospitalcity`);
+  }
+
+  getHospitalCodeName():Observable<HospitalCodeName[]>
+  {
+    return this.http.get<HospitalCodeName[]>(`${this.url}/hospitalnamescodes`); 
+  }
+
+    getHospitalCodeNamebyCode(code:number):Observable<HospitalCodeName[]>
+  {
+    return this.http.get<HospitalCodeName[]>(`${this.url}/hospitalnamescodes`); 
+  }
+
 }

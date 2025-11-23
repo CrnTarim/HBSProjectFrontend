@@ -10,6 +10,7 @@ import { DxDataGridComponent } from 'devextreme-angular';
   styleUrls: ['./rank.component.css']   
 })
 export class RankComponent implements OnInit {
+  newsaveRank=false;
   ranks: Rank[] = [];
   isLoading = true;
   selectedRank: Rank | null = null;
@@ -57,6 +58,7 @@ private initForm(): void {
   }
 
    newRank() {
+    this.newsaveRank=true;
     this.selectedRank = null;
     this.rankForm.reset();
     this.clearGridSearch();
@@ -104,11 +106,20 @@ deleteRank() {
 
   //  Kaydet butonuna basınca popup aç
   openConfirm() {
-    if (this.rankForm.invalid) {
+    if(this.newsaveRank || this.selectedRank)
+    {
+      if (this.rankForm.invalid) {
       alert('Lütfen gerekli alanları doldurun.');
       return;
     }
     this.popupVisible = true;
+    }
+    else
+    {
+       alert('Lütfen kayıt modu seçiniz doldurun.');
+      return;
+    }
+   
   }
 
   //  Popup içinden onay
