@@ -2,11 +2,13 @@ import { Component, ViewChild } from '@angular/core';
 import { HosdefinitionService } from '../../../services/hosdefinition.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Hospital, HospitalCodeName } from '../../../models/definition';
-import { DxDataGridComponent } from 'devextreme-angular';
+import { DxDataGridComponent,DxFormModule} from 'devextreme-angular';
+import DataSource from "devextreme/data/data_source";
+
 
 @Component({
   selector: 'app-hospital',
-  templateUrl: './hospital.component.html',
+  templateUrl:'./hospital.component.html',
   styleUrl: './hospital.component.css'
 })
 export class HospitalComponent {
@@ -20,6 +22,8 @@ export class HospitalComponent {
   hospitalForm!: FormGroup; 
   searchText: string = '';
   citycodes: number[] = []; 
+  dataSource: any;
+  
 
 @ViewChild('hospitalGrid', { static: false }) hospitalGrid!: DxDataGridComponent;  
 constructor(
@@ -33,6 +37,12 @@ constructor(
     this.gethospitaldef();
     this.gethospitalcities();
     this.gethospitalcodenames();
+    this.dataSource = new DataSource({
+    load: (loadOptions: any) => {
+                                  return this.defService.loadHospitals(loadOptions).toPromise();
+                                }
+});
+
   }
 private initForm(): void {
   this.hospitalForm = this.formBuilder.group({
@@ -88,16 +98,7 @@ private initForm(): void {
   //   this.selectedHospital=hospital;// seçimi tut
   //   this.hospitalForm.patchValue(hospital);//seçimi forma ayzdır
   // }
-  onRowSelect(h: Hospital) {
-  this.selectedHospital = h;
-  this.hospitalForm.patchValue(h);
-  // this.hospitalForm.patchValue({
-  //   id: h.id,
-  //   code: h.code,
-  //   name: h.name,
-  //   cityCode: h.cityCode   
-  // });
-}
+
 
 //Form temizle
    newHospital() {
@@ -185,4 +186,35 @@ private initForm(): void {
       alert('Bu kısımda updateRank çağrısı yapılacak.');
     }
   }
+  onRowSelect(h: Hospital) {
+  this.selectedHospital = h;
+  this.hospitalForm.patchValue(h);
+  // this.hospitalForm.patchValue({
+  //   id: h.id,
+  //   code: h.code,
+  //   name: h.name,
+  //   cityCode: h.cityCode   
+  // });
+}
+  detailPopupVisible = false;
+ selectedRow: Hospital | null = null;
+
+onDetailClick = (e: any) => {
+  if (!e.row || !e.row.data) {
+    console.error("Row gelmedi:", e);
+    return;
+  }
+
+  this.selectedRow = e.row.data;
+  this.detailPopupVisible = true;
+};
+onCellPrepared(e: any) {
+  if (e.rowType === "data" && e.value !== undefined && e.value !== null) {
+    e.cellElement.title = e.value.toString();
+  }
+}
+
+
+
+
 }

@@ -16,7 +16,7 @@ import { UserComponent } from './components/user/user.component';
 import { LoginComponent } from './components/login/login.component';
 
 import { MessageComponent } from './components/message/message.component';
-import { DxSelectBoxModule, DxDataGridModule, DxListModule, DxTextBoxModule, DxTagBoxModule, DxButtonModule, DxPieChartModule, DxPivotGridModule, DxPopupModule } from 'devextreme-angular';
+import { DxSelectBoxModule, DxDataGridModule, DxListModule, DxTextBoxModule, DxTagBoxModule, DxButtonModule, DxPieChartModule, DxPivotGridModule, DxPopupModule, DxFormModule } from 'devextreme-angular';
 import { PersonComponent } from './components/person/person.component';
 
 import { ReportComponent } from './components/report/report.component';
@@ -68,7 +68,8 @@ import { CityComponent } from './components/definitions/city/city.component';
     DxPieChartModule,
     DxPieChartModule,
     DxPivotGridModule,
-    DxPopupModule, 
+    DxPopupModule,
+    DxFormModule, 
     ReactiveFormsModule,
     StoreModule.forRoot({activeSingleSong:singlesongReducer})
  

@@ -61,19 +61,6 @@
         <option *ngFor="let h of hospitalcodename" [value]="h.code">{{ h.code }} - {{h.name}}</option>
       </select>
     </div>
-        <!-- <div class="form-group mt-3">
-      <label for="codecity">Şehir Kodu</label>
-      <select 
-        id="cityCode" 
-        class="form-control"
-        formControlName="cityCode">        
-        <option value="">Şehir kodu seçiniz</option>
-        <option *ngFor="let c of citycodes" [value]="c">{{ c}}</option>
-      </select>
-    </div> -->
-
-
-
       <div class="d-flex mt-4">
       
         <button
@@ -111,14 +98,16 @@
   <div class="mt-4">
     <dx-data-grid
       #hospitalGrid
-      [dataSource]="hospitals"
-      [showBorders]="true"
-      [columnAutoWidth]="true"
-      [allowColumnResizing]="true"
-      [rowAlternationEnabled]="true"
-      [hoverStateEnabled]="true"
-      keyExpr="id"
+       [dataSource]="dataSource"
+        [remoteOperations]="true"
+        [filterRow]="{ visible: true }"
+        [showBorders]="true"
+        [columnAutoWidth]="true"
+        [allowColumnResizing]="true"
+        [rowAlternationEnabled]="true"
+        keyExpr="id"
       (onRowClick)="onRowSelect($event.data)"
+      (onCellPrepared)="onCellPrepared($event)"
     >
       <dxo-paging [pageSize]="10"></dxo-paging>
       <dxo-pager
@@ -130,12 +119,13 @@
       <dxi-column dataField="code" caption="Kod"></dxi-column>
       <dxi-column dataField="name" caption="Hastane İsmi"></dxi-column>
       <dxi-column dataField="cityCode" caption ="Şehir Kodu"></dxi-column>
-      <dxi-column
-        dataField="createdDate"
-        caption="Oluşturulma Tarihi"
-        dataType="date"
-        format="dd.MM.yyyy"
-      ></dxi-column>
+      <dxi-column dataField="createdDate" caption="Oluşturulma Tarihi" dataType="date" format="dd.MM.yyyy"></dxi-column>
+      <dxi-column type="buttons">
+        <dxi-button
+          text="Detay"
+          [onClick]="onDetailClick">
+        </dxi-button>
+      </dxi-column>
     </dx-data-grid>
   </div>
 
@@ -156,4 +146,25 @@
       </div>
     </div>
   </dx-popup>
+
+<dx-popup
+  [(visible)]="detailPopupVisible"
+  [width]="500"
+  [height]="400"
+  title="Hastane Detayı"
+>
+  <dx-form
+    [formData]="selectedRow"
+    [colCount]="2"
+  >
+    <dxi-item dataField="code" [label]="{ text: 'Kod' }"></dxi-item>
+    <dxi-item dataField="name" [label]="{ text: 'Hastane Adı' }"></dxi-item>
+    <dxi-item dataField="cityCode" [label]="{ text: 'Şehir Kodu' }"></dxi-item>
+    <dxi-item 
+      dataField="createdDate" 
+      [label]="{ text: 'Oluşturulma Tarihi' }"
+      editorType="dxDateBox">
+    </dxi-item>
+  </dx-form>
+</dx-popup>
 </div>

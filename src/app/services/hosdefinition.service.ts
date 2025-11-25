@@ -29,6 +29,11 @@ export class HosdefinitionService {
     return this.http.get<Hospital[]>(`${this.url}/hospitals`);   
    }
 
+  loadHospitals(loadOptions: any) {
+  return this.http.post(`${this.url}/hospitals-load`, loadOptions);
+}
+
+
    postHospital(data:Hospital):Observable<Hospital>
    {
     return this.http.post<Hospital>(`${this.url}/posthospital`, data);
@@ -47,9 +52,9 @@ export class HosdefinitionService {
     return this.http.get<HospitalCodeName[]>(`${this.url}/hospitalnamescodes`); 
   }
 
-    getHospitalCodeNamebyCode(code:number):Observable<HospitalCodeName[]>
-  {
-    return this.http.get<HospitalCodeName[]>(`${this.url}/hospitalnamescodes`); 
-  }
+  //   getHospitalCodeNamebyCode(code:number):Observable<HospitalCodeName[]>
+  // {
+  //   return this.http.get<HospitalCodeName[]>(`${this.url}/hospitalnamescodes`); 
+  // }
 
 }
