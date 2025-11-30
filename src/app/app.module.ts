@@ -26,6 +26,8 @@ import { DefinitionsComponent } from './components/definitions/definitions.compo
 import { RankComponent } from './components/definitions/rank/rank.component';
 import { HospitalComponent } from './components/definitions/hospital/hospital.component';
 import { CityComponent } from './components/definitions/city/city.component';
+import { DispatchComponent } from './components/dispatch/dispatch.component';
+import { DispatchqueryComponent } from './components/dispatch/dispatchquery/dispatchquery.component';
 
 // ng g pipe/singerSearch dedigimiz icin otomatik olusturuldu
 
@@ -45,7 +47,9 @@ import { CityComponent } from './components/definitions/city/city.component';
     DefinitionsComponent,
     RankComponent,
     HospitalComponent,
-    CityComponent ,
+    CityComponent,
+    DispatchComponent,
+    DispatchqueryComponent ,
     
   ],
   imports: [

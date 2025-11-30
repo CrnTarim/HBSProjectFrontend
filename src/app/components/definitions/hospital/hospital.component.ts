@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { HosdefinitionService } from '../../../services/hosdefinition.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Hospital, HospitalCodeName } from '../../../models/definition';
+import { City, Hospital, HospitalCodeName } from '../../../models/definition';
 import { DxDataGridComponent,DxFormModule} from 'devextreme-angular';
 import DataSource from "devextreme/data/data_source";
 
@@ -23,6 +23,8 @@ export class HospitalComponent {
   searchText: string = '';
   citycodes: number[] = []; 
   dataSource: any;
+ city: City[] = [];
+
   
 
 @ViewChild('hospitalGrid', { static: false }) hospitalGrid!: DxDataGridComponent;  
@@ -35,7 +37,7 @@ constructor(
     //  reactive form
     this.initForm();
     this.gethospitaldef();
-    this.gethospitalcities();
+    // this.gethospitalcities();
     this.gethospitalcodenames();
     this.dataSource = new DataSource({
     load: (loadOptions: any) => {
@@ -66,20 +68,7 @@ private initForm(): void {
     });
   }
 
-  gethospitalcities()
-  {
-    this.defService.getHospitalCityCodes().subscribe({
-     next:(data)=>{
-        this.citycodes = data;
-       
-      },
-      error: (err) => {
-        console.error('Rank verisi alınamadı', err);
-        this.isLoading = false;
-       }
-    })
-    console.log( this.citycodes);
-  }
+
 
   gethospitalcodenames()
   {
@@ -107,7 +96,6 @@ private initForm(): void {
     this.hospitalForm.reset();
     this.clearGridSearch();
   }
-
   //Hastane sil
   deleteRank() {
     if (!this.selectedHospital|| !this.selectedHospital.id) {
@@ -189,6 +177,11 @@ private initForm(): void {
   onRowSelect(h: Hospital) {
   this.selectedHospital = h;
   this.hospitalForm.patchValue(h);
+  console.log(h.code);
+
+  if(h.code)
+     this.gethospitalcities(h.code)
+  
   // this.hospitalForm.patchValue({
   //   id: h.id,
   //   code: h.code,
@@ -196,8 +189,24 @@ private initForm(): void {
   //   cityCode: h.cityCode   
   // });
 }
-  detailPopupVisible = false;
- selectedRow: Hospital | null = null;
+
+  gethospitalcities(id:number)
+  {
+    this.defService.getHospitalselectedcity(id).subscribe({
+     next:(data)=>{
+        this.city = data;
+       
+      },
+      error: (err) => {
+        console.error('Cityverisi alınamadı', err);
+        this.isLoading = false;
+       }
+    })
+    console.log( this.citycodes);
+  }
+
+detailPopupVisible = false;
+selectedRow: Hospital | null = null;
 
 onDetailClick = (e: any) => {
   if (!e.row || !e.row.data) {
@@ -213,8 +222,5 @@ onCellPrepared(e: any) {
     e.cellElement.title = e.value.toString();
   }
 }
-
-
-
 
 }

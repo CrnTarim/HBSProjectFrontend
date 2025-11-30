@@ -129,6 +129,33 @@
     </dx-data-grid>
   </div>
 
+    <div class="mt-4">
+    <dx-data-grid
+      #cityGrid
+       [dataSource]="city"
+        [remoteOperations]="true"
+        [filterRow]="{ visible: true }"
+        [showBorders]="true"
+        [columnAutoWidth]="true"
+        [allowColumnResizing]="true"
+        [rowAlternationEnabled]="true"
+        keyExpr="id"
+      (onRowClick)="onRowSelect($event.data)"
+      (onCellPrepared)="onCellPrepared($event)"
+    >
+      <dxo-paging [pageSize]="10"></dxo-paging>
+      <dxo-pager
+        [showPageSizeSelector]="true"
+        [allowedPageSizes]="[5, 10, 20]"
+        [showInfo]="true"
+      ></dxo-pager>
+
+      <dxi-column dataField="code" caption="Kod"></dxi-column>
+      <dxi-column dataField="name" caption="Şehir İsmi"></dxi-column>
+     
+    </dx-data-grid>
+  </div>
+
   <!-- Popup -->
   <dx-popup
     [(visible)]="popupVisible"

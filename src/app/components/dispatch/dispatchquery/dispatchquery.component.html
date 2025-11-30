@@ -1,0 +1,92 @@
+<div class="p-3">
+
+  <h3>Dispatch Arama</h3>
+
+  <form [formGroup]="dateForm" class="row g-3">
+    <div class="col-md-4">
+      <label>Başlangıç Tarihi</label>
+      <input type="date" formControlName="startDate" class="form-control">
+    </div>
+
+    <div class="col-md-4">
+      <label>Bitiş Tarihi</label>
+      <input type="date" formControlName="endDate" class="form-control">
+    </div>
+
+    <div class="col-md-4 align-self-end">
+      <button type="button" class="btn btn-primary w-100" (click)="loadDispatch()">
+        Dispatch Getir
+      </button>
+    </div>
+  </form>
+
+
+  <hr>
+
+  <h4>Dispatch Listesi</h4>
+
+ <div class="mt-4">
+    <dx-data-grid
+      #hospitalGrid
+       [dataSource]="dispatchlist"
+        [remoteOperations]="true"
+        [filterRow]="{ visible: true }"
+        [showBorders]="true"
+        [columnAutoWidth]="true"
+        [allowColumnResizing]="true"
+        [rowAlternationEnabled]="true"
+        keyExpr="id"
+    
+    >
+      <dxo-paging [pageSize]="10"></dxo-paging>
+      <dxo-pager
+        [showPageSizeSelector]="true"
+        [allowedPageSizes]="[5, 10, 20]"
+        [showInfo]="true"
+      ></dxo-pager>
+
+      <dxi-column dataField="rankCode" caption="Kod"></dxi-column>
+      <dxi-column dataField="rankName" caption="Rütbe İsmi"></dxi-column>
+      <dxi-column dataField="forceCode" caption ="Rütbe Kodu"></dxi-column>
+      <dxi-column dataField="forceName" caption="Rütbe İsmi"></dxi-column>
+      <dxi-column dataField="hospitalCode" caption ="Hastane Kodu"></dxi-column>
+      <dxi-column dataField="hospitalName" caption="Hastane İsmi"></dxi-column>
+     
+     
+    </dx-data-grid>
+  </div>
+
+</div>
+<!-- 
+ dispatchCode?: number;
+  state?: number;
+  autoDispatch?: number | null;
+
+  // HOSPITAL
+  hospitalId?: string;
+  hospitalCode?: number;
+  hospitalName?: string;
+
+  // FORCE
+  forceId?: string;
+  forceCode?: number;
+  forceName?: string | null;
+
+  // RANK
+  rankId?: string;
+  rankCode?: number;
+  rankName?: string | null;
+
+  // ADMISSION
+  admissionId?: string;
+  admissionCode?: number;
+  admissionName?: string | null;
+
+  // PERSON
+  personId?: string;
+  personFullName?: string | null;
+
+  // REASON FOR EXAMINATION
+  reasonforexaminationId?: string;
+  reasonforexaminationCode?: number;
+  reasonforexaminationName?: string | null; -->

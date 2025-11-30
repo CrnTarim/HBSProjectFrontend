@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CityDto, DiagnosisDto, FactReport, HCDecisionDto, HospitalDto } from '../models/statistic';
+import { Dispatch } from '../models/dispatch';
 
 @Injectable({ providedIn: 'root' })
 export class StatisticService {
@@ -13,6 +14,11 @@ export class StatisticService {
   /** Flat (rapor x tanı) satırlar */
   getFact(date: DatetimeInput): Observable<FactReport[]> {
     return this.http.post<FactReport[]>(`${this.url}/stats/fact`, date);
+  }
+
+
+  getDispatch(date: DatetimeInput): Observable<Dispatch[]> {
+    return this.http.post<Dispatch[]>(`${this.url}/GetAllDispatches`, date);
   }
 
   getCities(): Observable<CityDto[]> {

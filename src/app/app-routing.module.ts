@@ -14,6 +14,7 @@ import { LinechartComponent } from './components/linechart/linechart.component';
 import { RankComponent } from './components/definitions/rank/rank.component';
 import { HospitalComponent } from './components/definitions/hospital/hospital.component';
 import { CityComponent } from './components/definitions/city/city.component';
+import { DispatchqueryComponent } from './components/dispatch/dispatchquery/dispatchquery.component';
 
 const routes: Routes = [
 
@@ -30,9 +31,11 @@ const routes: Routes = [
   {path:'report',component:ReportComponent},
   {path:'reportgrid',component:ReportgridComponent},
   {path:'statistic',component:LinechartComponent},
-  {path: 'definitions/ranks', component: RankComponent },
+  {path:'definitions/ranks', component: RankComponent },
   {path:'definitions/hospitals',component:HospitalComponent},
-    {path:'definitions/city',component:CityComponent},
+  {path:'definitions/city',component:CityComponent},
+  {path:'dispatch/dispatchquery',component:DispatchqueryComponent},
+
 
 
   

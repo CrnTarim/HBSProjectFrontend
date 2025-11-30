@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Hospital, HospitalCodeName, Rank } from '../models/definition';
+import { City, Hospital, HospitalCodeName, Rank } from '../models/definition';
 
 @Injectable({
   providedIn: 'root'
@@ -51,6 +51,12 @@ export class HosdefinitionService {
   {
     return this.http.get<HospitalCodeName[]>(`${this.url}/hospitalnamescodes`); 
   }
+
+  getHospitalselectedcity(id:number):Observable<City[]>
+  {
+    return this.http.get<City[]>(`${this.url}/hospitalselectedcity/${id}`); 
+  }
+
 
   //   getHospitalCodeNamebyCode(code:number):Observable<HospitalCodeName[]>
   // {

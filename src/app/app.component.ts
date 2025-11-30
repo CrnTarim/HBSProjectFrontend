@@ -39,10 +39,15 @@ export class AppComponent {
   }
   
 definitionsOpen = false;
-  sidebarCollapsed = false;
+sidebarCollapsed = false;
+dispatchOpen=false;
 
   toggleDefinitions() {
     this.definitionsOpen = !this.definitionsOpen;
+  }
+
+  toggleDispatch() {
+    this.dispatchOpen = !this.dispatchOpen;
   }
 
   toggleSidebar() {
