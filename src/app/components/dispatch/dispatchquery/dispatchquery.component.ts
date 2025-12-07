@@ -1,8 +1,9 @@
+import { StatisticService } from './../../../services/statistic.service';
 import { Component } from '@angular/core';
-import { Dispatch } from '../../../models/dispatch';
+import { Dispatch, DispatchFilterRequest } from '../../../models/dispatch';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { StatisticService } from '../../../services/statistic.service';
-import { DatetimeInput } from '../../../models/statistic';
+import { DatetimeInput, ForceDto, HospitalDto, RankDto } from '../../../models/statistic';
+import { DispatchService } from '../../../services/dispatch.service';
 
 @Component({
   selector: 'app-dispatchquery',
@@ -10,35 +11,63 @@ import { DatetimeInput } from '../../../models/statistic';
   styleUrl: './dispatchquery.component.css'
 })
 export class DispatchqueryComponent {
+  filterModel = new DispatchFilterRequest();   // 🔥 Sadece model
   dispatchlist: Dispatch[] = [];
-  dateForm!: FormGroup;
+  rankList:RankDto []=[];
+  hospitalList:HospitalDto []=[];
+  forceList :ForceDto []=[];
 
-  constructor(
-    private api: StatisticService,
-    private fb: FormBuilder
-  ) {}
+  constructor(private dispatchService: DispatchService,private statisticService:StatisticService) {}
 
-  ngOnInit(): void {
-    this.dateForm = this.fb.group({
-      startDate: [''],
-      endDate: ['']
+   ngOnInit(): void {
+     this.loadRanks();
+     this.loadForce();
+     this.loadHospital();
+     
+  };
+  
+
+  loadDispatch() {
+    console.log("Gönderilecek model:", this.filterModel);
+
+    this.dispatchService.getDispatch(this.filterModel).subscribe({
+      next: data => {
+        this.dispatchlist = data;
+        console.log("Gelen dispatch listesi:", data);
+      },
+      error: err => console.error(err)
     });
   }
 
-  loadDispatch() {
-    const date: DatetimeInput = {
-      StartDate: this.dateForm.value.startDate,
-      EndDate: this.dateForm.value.endDate
-    };
-
-    this.api.getDispatch(date).subscribe({
-      next: data => {
-        this.dispatchlist = data;
-        console.log("Dispatch listesi geldi:", data);
+  loadRanks()
+  {
+    this.statisticService.getRanks().subscribe({
+       next: data => {
+        this.rankList = data;
       },
-      error: err => {
-        console.error("Dispatch API hata", err);
-      }
-    });
+      error: err => console.error(err)
+    })
+  }
+
+  loadForce()
+  {
+    this.statisticService.getForces().subscribe({
+       next: data => {
+        this.forceList = data;
+      },
+      error: err => console.error(err)
+    })
+  }
+
+  loadHospital()
+  {
+    this.statisticService.getHospitals().subscribe({
+       next: data => {
+        this.hospitalList = data;
+        console.log("Gelen hastane listesi:", data);
+        
+      },
+      error: err => console.error(err)
+    })
   }
 }

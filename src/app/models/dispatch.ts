@@ -34,7 +34,23 @@ export class Dispatch {
   reasonforexaminationName?: string | null;
 }
 
+
 export interface DatetimeInputDispatch {
   StartDate: string;
   EndDate: string;
 }
+
+
+export class DatetimeRange {
+  startDate: Date | null = null;
+  endDate: Date | null = null;
+}
+
+export class DispatchFilterRequest {
+  datetime: DatetimeRange = new DatetimeRange();
+  hospitalId: string | null = null;
+  rankId: string | null = null;
+  forceId: string | null = null;
+  personId: string | null = null;
+}
+

@@ -26,3 +26,10 @@ export class City
   code?: number;
   name?: string;
 }
+
+export class CreateHospital
+{
+  code?:number;
+  name?:string;
+  citycode?:number;
+}

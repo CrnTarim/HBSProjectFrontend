@@ -1,92 +1,99 @@
 <div class="p-3">
 
-  <h3>Dispatch Arama</h3>
+  <h3 class="mb-4">Dispatch Arama</h3>
 
-  <form [formGroup]="dateForm" class="row g-3">
-    <div class="col-md-4">
-      <label>Başlangıç Tarihi</label>
-      <input type="date" formControlName="startDate" class="form-control">
-    </div>
-
-    <div class="col-md-4">
-      <label>Bitiş Tarihi</label>
-      <input type="date" formControlName="endDate" class="form-control">
-    </div>
-
-    <div class="col-md-4 align-self-end">
-      <button type="button" class="btn btn-primary w-100" (click)="loadDispatch()">
-        Dispatch Getir
-      </button>
-    </div>
-  </form>
-
-
-  <hr>
-
-  <h4>Dispatch Listesi</h4>
-
- <div class="mt-4">
-    <dx-data-grid
-      #hospitalGrid
-       [dataSource]="dispatchlist"
-        [remoteOperations]="true"
-        [filterRow]="{ visible: true }"
-        [showBorders]="true"
-        [columnAutoWidth]="true"
-        [allowColumnResizing]="true"
-        [rowAlternationEnabled]="true"
-        keyExpr="id"
-    
-    >
-      <dxo-paging [pageSize]="10"></dxo-paging>
-      <dxo-pager
-        [showPageSizeSelector]="true"
-        [allowedPageSizes]="[5, 10, 20]"
-        [showInfo]="true"
-      ></dxo-pager>
-
-      <dxi-column dataField="rankCode" caption="Kod"></dxi-column>
-      <dxi-column dataField="rankName" caption="Rütbe İsmi"></dxi-column>
-      <dxi-column dataField="forceCode" caption ="Rütbe Kodu"></dxi-column>
-      <dxi-column dataField="forceName" caption="Rütbe İsmi"></dxi-column>
-      <dxi-column dataField="hospitalCode" caption ="Hastane Kodu"></dxi-column>
-      <dxi-column dataField="hospitalName" caption="Hastane İsmi"></dxi-column>
-     
-     
-    </dx-data-grid>
+  <!-- SATIR 1: TARİHLER -->
+<div class="row g-3">
+  <div class="col-md-4">
+    <label>Başlangıç Tarihi</label>
+    <input 
+      type="date"
+      class="form-control"
+      [(ngModel)]="filterModel.datetime.startDate"
+      name="startDate"
+    />
+  </div>
+  
+  <div class="col-md-4">
+    <label>Bitiş Tarihi</label>
+    <input 
+      type="date"
+      class="form-control"
+      [(ngModel)]="filterModel.datetime.endDate"
+      name="endDate"
+    />
   </div>
 
 </div>
-<!-- 
- dispatchCode?: number;
-  state?: number;
-  autoDispatch?: number | null;
 
-  // HOSPITAL
-  hospitalId?: string;
-  hospitalCode?: number;
-  hospitalName?: string;
+<!-- SATIR 2: RÜTBE -->
+<div class="row g-3 mt-2">
+  
+  <div class="col-md-2">
+    <label>Rütbe</label>
+    <select
+      class="form-control"
+      name="rankId"
+      [(ngModel)]="filterModel.rankId">
 
-  // FORCE
-  forceId?: string;
-  forceCode?: number;
-  forceName?: string | null;
+      <option [ngValue]="null">Rütbe seçiniz</option>
+      <option *ngFor="let r of rankList" [ngValue]="r.id">
+        {{ r.name }}
+      </option>
+    </select>
+  </div>
 
-  // RANK
-  rankId?: string;
-  rankCode?: number;
-  rankName?: string | null;
+  <div class="col-md-2">
+    <label>Kuvvet</label>
+    <select
+      class="form-control"
+      name="forceId"
+      [(ngModel)]="filterModel.forceId">
 
-  // ADMISSION
-  admissionId?: string;
-  admissionCode?: number;
-  admissionName?: string | null;
+      <option [ngValue]="null">Kuvvet seçiniz</option>
+      <option *ngFor="let r of forceList" [ngValue]="r.id">
+        {{ r.name }}
+      </option>
+    </select>
+  </div>
 
-  // PERSON
-  personId?: string;
-  personFullName?: string | null;
+  <div class="col-md-2">
+    <label>Hastane</label>
+    <select
+      class="form-control"
+      name="forceId"
+      [(ngModel)]="filterModel.hospitalId">
 
-  // REASON FOR EXAMINATION
-  reasonforexaminationId?: string;
-  reasonforexaminationCode?: number;
-  reasonforexaminationName?: string | null; -->
+      <option [ngValue]="null">Hastane seçiniz</option>
+      <option *ngFor="let r of  hospitalList" [ngValue]="r.id">
+        {{ r.name }}
+      </option>
+    </select>
+  </div>
+
+</div>
+
+
+  <div class="d-flex justify-content-end mt-3">
+    <button 
+      class="btn btn-primary px-4"
+      (click)="loadDispatch()">
+      Dispatch Getir
+    </button>
+  </div>
+
+  <hr class="my-4">
+
+  <!-- GRID -->
+  <dx-data-grid
+      [dataSource]="dispatchlist"
+      [columnAutoWidth]="true"
+      [showBorders]="true">
+      <dxi-column dataField="dispatchCode" caption="Kod"></dxi-column>
+      <dxi-column dataField="hospitalName" caption="Hastane"></dxi-column>
+      <dxi-column dataField="forceName" caption="Kuvvet"></dxi-column>
+      <dxi-column dataField="rankName" caption="Rütbe"></dxi-column>
+      <dxi-column dataField="personFullName" caption="Kişi"></dxi-column>
+  </dx-data-grid>
+
+</div>

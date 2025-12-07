@@ -28,7 +28,6 @@
         <ul *ngIf="definitionsOpen" class="list-unstyled pl-3">
           <li><a routerLink="/definitions/hospitals" class="text-white">Hastane Tanımları</a></li>
           <li><a routerLink="/definitions/ranks" class="text-white">Rütbe Tanımları</a></li>
-          <li><a routerLink="/definitions/forces" class="text-white">Kuvvet Tanımları</a></li>
           <li><a routerLink="/definitions/city" class="text-white">Şehir Tanımları</a></li>
         </ul>
       </li>
@@ -38,12 +37,10 @@
           Sevk
           <span class="float-right pr-2" [ngClass]="{ rotate: dispatchOpen }">▼</span>
         </a>
-
         <ul *ngIf="dispatchOpen" class="list-unstyled pl-3">
           <li><a routerLink="/dispatch/dispatchquery" class="text-white">Sevk Sorgula</a></li>
         </ul>
       </li>
-
 
       <li><a routerLink="/statistic" class="text-white">İstatistik</a></li>
       <li><a routerLink="/reports" class="text-white">Raporlar</a></li>
