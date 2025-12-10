@@ -63,7 +63,7 @@
       >
         <option value="">Şehir kodu seçiniz</option>
         <option *ngFor="let h of hospitalcodename" [value]="h.code">
-          {{ h.code }} - {{h.name }}
+          {{ h.code }} - {{ h.name }}
         </option>
       </select>
     </div>
@@ -97,63 +97,78 @@
       >
         Yeni Kayıt
       </button>
+
     </div>
   </div>
 
-  <!-- HASTANE GRID -->
-  <div class="mt-4">
-    <dx-data-grid
-      #hospitalGrid
-      [dataSource]="dataSource"
-      [remoteOperations]="true"
-      [filterRow]="{ visible: true }"
-      [showBorders]="true"
-      [columnAutoWidth]="true"
-      [allowColumnResizing]="true"
-      [rowAlternationEnabled]="true"
-      keyExpr="id"
-      (onRowClick)="onRowSelect($event.data)"
-      (onCellPrepared)="onCellPrepared($event)"
-    >
+  
+<dx-tab-panel 
+    #tabPanel
+    [(selectedIndex)]="selectedIndex"
+    [animationEnabled]="true"
+    [swipeEnabled]="true"
+    [loop]="false"
+    [deferRendering]="false"
+    class="animated-tabs">
+      
+    <dxi-item title="Hastane Listesi">
+      <div class="mt-4">
 
-      <dxo-paging [pageSize]="10"></dxo-paging>
+        <dx-data-grid
+          #hospitalGrid
+          [dataSource]="dataSource"
+          [remoteOperations]="true"
+          [filterRow]="{ visible: true }"
+          [showBorders]="true"
+          [columnAutoWidth]="true"
+          [allowColumnResizing]="true"
+          [rowAlternationEnabled]="true"
+          keyExpr="id"
+          (onRowClick)="onRowSelect($event.data)"
+          (onCellPrepared)="onCellPrepared($event)"
+        >
 
-      <dxi-column dataField="code" caption="Kod"></dxi-column>
-      <dxi-column dataField="name" caption="Hastane İsmi"></dxi-column>
-      <dxi-column dataField="cityCode" caption="Şehir Kodu"></dxi-column>
-      <dxi-column dataField="createdDate" caption="Oluşturulma Tarihi" dataType="date" format="dd.MM.yyyy"></dxi-column>
+          <dxo-paging [pageSize]="10"></dxo-paging>
 
-      <dxi-column type="buttons">
-        <dxi-button
-          text="Detay"
-          [onClick]="onDetailClick">
-        </dxi-button>
-      </dxi-column>
+          <dxi-column dataField="code" caption="Kod"></dxi-column>
+          <dxi-column dataField="name" caption="Hastane İsmi"></dxi-column>
+          <dxi-column dataField="cityCode" caption="Şehir Kodu"></dxi-column>
+          <dxi-column dataField="createdDate" caption="Oluşturulma Tarihi" dataType="date" format="dd.MM.yyyy"></dxi-column>
 
-    </dx-data-grid>
-  </div>
+          <dxi-column type="buttons">
+            <dxi-button text="Detay" 
+            [onClick]="onDetailClick">
+          </dxi-button>
+          </dxi-column>
+        </dx-data-grid>
+      </div>
+    </dxi-item>
 
-  <!-- ŞEHİR GRID -->
-  <div class="mt-4">
-    <dx-data-grid
-      #cityGrid
-      [dataSource]="city"
-      [remoteOperations]="true"
-      [filterRow]="{ visible: true }"
-      [showBorders]="true"
-      [columnAutoWidth]="true"
-      [allowColumnResizing]="true"
-      [rowAlternationEnabled]="true"
-      keyExpr="id"
-      (onRowClick)="onRowSelect($event.data)"
-      (onCellPrepared)="onCellPrepared($event)"
-    >
+   
+    <dxi-item title="Şehir Listesi">
+      <div class="mt-4">
 
-      <dxi-column dataField="code" caption="Kod"></dxi-column>
-      <dxi-column dataField="name" caption="Şehir İsmi"></dxi-column>
+        <dx-data-grid
+          #cityGrid
+          [dataSource]="city"
+          [remoteOperations]="true"
+          [filterRow]="{ visible: true }"
+          [showBorders]="true"
+          [columnAutoWidth]="true"
+          [allowColumnResizing]="true"
+          [rowAlternationEnabled]="true"
+          keyExpr="id"
+          (onCellPrepared)="onCellPrepared($event)"
+        >
+          <dxi-column dataField="code" caption="Kod"></dxi-column>
+          <dxi-column dataField="name" caption="Şehir İsmi"></dxi-column>
+        </dx-data-grid>
 
-    </dx-data-grid>
-  </div>
+      </div>
+    </dxi-item>
+
+  </dx-tab-panel>
+
 
   <!-- POPUP -->
   <dx-popup

@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { HosdefinitionService } from '../../../services/hosdefinition.service';
 import { City, CreateHospital, Hospital, HospitalCodeName } from '../../../models/definition';
-import { DxDataGridComponent } from 'devextreme-angular';
+import { DxDataGridComponent,DxTabPanelModule } from 'devextreme-angular';
 import DataSource from "devextreme/data/data_source";
 
 @Component({
@@ -26,6 +26,7 @@ export class HospitalComponent {
   dataSource: any;
 
   @ViewChild('hospitalGrid', { static: false }) hospitalGrid!: DxDataGridComponent;
+  @ViewChild('tabPanel', { static: false }) tabPanel: any;
 
   constructor(private defService: HosdefinitionService) {}
 
@@ -117,8 +118,6 @@ export class HospitalComponent {
         name: this.viewModel.name,
         citycode: this.viewModel.citycode
       };
-
-    
     }
   }
 
@@ -129,18 +128,23 @@ export class HospitalComponent {
     });
   }
 
+selectedIndex = 0;
 
-  onRowSelect(h: Hospital) {
-    this.selectedHospital = h;
-    if(h.code!=null && h.name!=null && h.cityCode!=null)
-    {
+onRowSelect(h: Hospital) {
+  this.selectedHospital = h;
+
+  if (h.code && h.name && h.cityCode) {
     this.viewModel = {
-          code: h.code,
-          name: h.name,
-          citycode: h.cityCode
-        };
-    }
+      code: h.code,
+      name: h.name,
+      citycode: h.cityCode
+    };
+    this.gethospitalcities(h.code);
   }
+
+  this.selectedIndex = 1;
+}
+
 
   onDetailClick = (e: any) => {
     if (e.row?.data) {
