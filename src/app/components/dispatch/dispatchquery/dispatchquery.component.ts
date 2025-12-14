@@ -1,6 +1,6 @@
 import { StatisticService } from './../../../services/statistic.service';
 import { Component } from '@angular/core';
-import { Dispatch, DispatchFilterRequest } from '../../../models/dispatch';
+import { Dispatch, DispatchFilterRequest, DispatchStateSummary, DispatchStateSummaryInput } from '../../../models/dispatch';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { DatetimeInput, ForceDto, HospitalDto, RankDto } from '../../../models/statistic';
 import { DispatchService } from '../../../services/dispatch.service';
@@ -11,11 +11,13 @@ import { DispatchService } from '../../../services/dispatch.service';
   styleUrl: './dispatchquery.component.css'
 })
 export class DispatchqueryComponent {
-  filterModel = new DispatchFilterRequest();   // 🔥 Sadece model
+  filterModel = new DispatchFilterRequest();   
   dispatchlist: Dispatch[] = [];
   rankList:RankDto []=[];
   hospitalList:HospitalDto []=[];
   forceList :ForceDto []=[];
+  dispatchSummaryList:DispatchStateSummary []=[];
+  dispatchSummaryInput=new DispatchStateSummaryInput();
 
   constructor(private dispatchService: DispatchService,private statisticService:StatisticService) {}
 
@@ -33,6 +35,18 @@ export class DispatchqueryComponent {
     this.dispatchService.getDispatch(this.filterModel).subscribe({
       next: data => {
         this.dispatchlist = data;
+        console.log("Gelen dispatch listesi:", data);
+      },
+      error: err => console.error(err)
+    });
+  }
+  
+  loadDispatchSummary() {
+    console.log("Gönderilecek model:", this.filterModel);
+
+    this.dispatchService.getDispatchSummary(this.dispatchSummaryInput).subscribe({
+      next: data => {
+        this.dispatchSummaryList = data;
         console.log("Gelen dispatch listesi:", data);
       },
       error: err => console.error(err)

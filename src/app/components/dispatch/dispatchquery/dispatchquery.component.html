@@ -1,99 +1,145 @@
-<div class="p-3">
+<dx-tab-panel
+  #tabPanel
+  [selectedIndex]="0"
+  [animationEnabled]="true"
+  [swipeEnabled]="true"
+  [loop]="false"
+  [deferRendering]="false"
+  class="animated-tabs">
 
-  <h3 class="mb-4">Dispatch Arama</h3>
+  <!-- TAB 1 -->
+  <dxi-item title="Hastane Listesi">
+    <div class="mt-4 p-3">
 
-  <!-- SATIR 1: TARİHLER -->
-<div class="row g-3">
-  <div class="col-md-4">
-    <label>Başlangıç Tarihi</label>
-    <input 
-      type="date"
-      class="form-control"
-      [(ngModel)]="filterModel.datetime.startDate"
-      name="startDate"
-    />
-  </div>
-  
-  <div class="col-md-4">
-    <label>Bitiş Tarihi</label>
-    <input 
-      type="date"
-      class="form-control"
-      [(ngModel)]="filterModel.datetime.endDate"
-      name="endDate"
-    />
-  </div>
+      <h3 class="mb-4">Dispatch Arama</h3>
 
-</div>
+      <!-- SATIR 1: TARİHLER -->
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label>Başlangıç Tarihi</label>
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="filterModel.datetime.startDate"
+            name="startDate" />
+        </div>
 
-<!-- SATIR 2: RÜTBE -->
-<div class="row g-3 mt-2">
-  
-  <div class="col-md-2">
-    <label>Rütbe</label>
-    <select
-      class="form-control"
-      name="rankId"
-      [(ngModel)]="filterModel.rankId">
+        <div class="col-md-4">
+          <label>Bitiş Tarihi</label>
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="filterModel.datetime.endDate"
+            name="endDate" />
+        </div>
+      </div>
 
-      <option [ngValue]="null">Rütbe seçiniz</option>
-      <option *ngFor="let r of rankList" [ngValue]="r.id">
-        {{ r.name }}
-      </option>
-    </select>
-  </div>
+      <!-- SATIR 2: SELECTLER -->
+      <div class="row g-3 mt-3">
+        <div class="col-md-2">
+          <label>Rütbe</label>
+          <select
+            class="form-control"
+            [(ngModel)]="filterModel.rankId">
+            <option [ngValue]="null">Rütbe seçiniz</option>
+            <option *ngFor="let r of rankList" [ngValue]="r.id">
+              {{ r.name }}
+            </option>
+          </select>
+        </div>
 
-  <div class="col-md-2">
-    <label>Kuvvet</label>
-    <select
-      class="form-control"
-      name="forceId"
-      [(ngModel)]="filterModel.forceId">
+        <div class="col-md-2">
+          <label>Kuvvet</label>
+          <select
+            class="form-control"
+            [(ngModel)]="filterModel.forceId">
+            <option [ngValue]="null">Kuvvet seçiniz</option>
+            <option *ngFor="let f of forceList" [ngValue]="f.id">
+              {{ f.name }}
+            </option>
+          </select>
+        </div>
 
-      <option [ngValue]="null">Kuvvet seçiniz</option>
-      <option *ngFor="let r of forceList" [ngValue]="r.id">
-        {{ r.name }}
-      </option>
-    </select>
-  </div>
+        <div class="col-md-2">
+          <label>Hastane</label>
+          <select
+            class="form-control"
+            [(ngModel)]="filterModel.hospitalId">
+            <option [ngValue]="null">Hastane seçiniz</option>
+            <option *ngFor="let h of hospitalList" [ngValue]="h.id">
+              {{ h.name }}
+            </option>
+          </select>
+        </div>
+      </div>
 
-  <div class="col-md-2">
-    <label>Hastane</label>
-    <select
-      class="form-control"
-      name="forceId"
-      [(ngModel)]="filterModel.hospitalId">
+      <!-- BUTTON -->
+      <div class="d-flex justify-content-end mt-4">
+        <button class="btn btn-primary px-4" (click)="loadDispatch()">
+          Dispatch Getir
+        </button>
+      </div>
 
-      <option [ngValue]="null">Hastane seçiniz</option>
-      <option *ngFor="let r of  hospitalList" [ngValue]="r.id">
-        {{ r.name }}
-      </option>
-    </select>
-  </div>
+      <hr class="my-4">
 
-</div>
+      <!-- GRID -->
+      <dx-data-grid
+        [dataSource]="dispatchlist"
+        [columnAutoWidth]="true"
+        [showBorders]="true">
 
+        <dxi-column dataField="dispatchCode" caption="Kod"></dxi-column>
+        <dxi-column dataField="hospitalName" caption="Hastane"></dxi-column>
+        <dxi-column dataField="forceName" caption="Kuvvet"></dxi-column>
+        <dxi-column dataField="rankName" caption="Rütbe"></dxi-column>
+        <dxi-column dataField="personFullName" caption="Kişi"></dxi-column>
 
-  <div class="d-flex justify-content-end mt-3">
-    <button 
-      class="btn btn-primary px-4"
-      (click)="loadDispatch()">
-      Dispatch Getir
-    </button>
-  </div>
+      </dx-data-grid>
 
-  <hr class="my-4">
+    </div>
+  </dxi-item>
 
-  <!-- GRID -->
-  <dx-data-grid
-      [dataSource]="dispatchlist"
-      [columnAutoWidth]="true"
-      [showBorders]="true">
-      <dxi-column dataField="dispatchCode" caption="Kod"></dxi-column>
-      <dxi-column dataField="hospitalName" caption="Hastane"></dxi-column>
-      <dxi-column dataField="forceName" caption="Kuvvet"></dxi-column>
-      <dxi-column dataField="rankName" caption="Rütbe"></dxi-column>
-      <dxi-column dataField="personFullName" caption="Kişi"></dxi-column>
-  </dx-data-grid>
+  <!-- TAB 2 -->
+  <dxi-item title="Provizyon Durum Ozeti">
+    <div class="mt-4 p-3">
+      <h3 class="mb-4">Provizyon Durum Ozeti Arama</h3>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label>Başlangıç Tarihi</label>
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="dispatchSummaryInput.createdDate"
+            name="startDate" />
+        </div>
 
-</div>
+        <div class="col-md-4">
+          <label>Bitiş Tarihi</label>
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="dispatchSummaryInput.purchaseId"
+            name="endDate" />
+        </div>
+      </div>
+
+       <div class="d-flex justify-content-end mt-4">
+        <button class="btn btn-primary px-4" (click)="loadDispatchSummary()">
+          Dispatch Getir
+        </button>
+      </div>
+
+      <dx-data-grid
+        [dataSource]="dispatchSummaryList"
+        [columnAutoWidth]="true"
+        [showBorders]="true">
+
+        <dxi-column dataField="personId" caption="Kisi Id"></dxi-column>
+        <dxi-column dataField="purchaseId" caption="Alım Numarası"></dxi-column>
+        <dxi-column dataField="currentState" caption="Durumu"></dxi-column>
+        <dxi-column dataField="dateTime"caption="Tarih" format="shortDate"></dxi-column>
+      </dx-data-grid>
+    </div>
+  </dxi-item>
+
+</dx-tab-panel>

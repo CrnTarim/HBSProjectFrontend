@@ -54,3 +54,15 @@ export class DispatchFilterRequest {
   personId: string | null = null;
 }
 
+
+export class DispatchStateSummary {
+  personId: string | null = null;
+  purchaseId?: number;
+  currentState: string | null = null; 
+  dateTime: Date | null = null;
+}
+
+export class DispatchStateSummaryInput {
+  createdDate!: Date;    
+  purchaseId!: number;  
+}
