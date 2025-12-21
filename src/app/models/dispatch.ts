@@ -1,7 +1,9 @@
 export class Dispatch {
 
+  dispatchId!:string;
   dispatchCode?: number;
   state?: number;
+  selected: boolean = false;//cehckbox secimi icin
   autoDispatch?: number | null;
 
   // HOSPITAL

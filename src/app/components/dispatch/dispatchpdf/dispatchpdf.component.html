@@ -1,0 +1,22 @@
+<div class="h-100 d-flex flex-column">
+
+  <object
+    *ngIf="pdfUrl"
+    [data]="pdfUrl"
+    type="application/pdf"
+    width="100%"
+    height="100%">
+  </object>
+
+  <div class="d-flex justify-content-between mt-2">
+    <div>
+      <span>{{ currentIndex + 1 }} / {{ dispatchIds.length }}</span>
+    </div>
+
+    <div>
+      <button class="btn btn-success me-2" (click)="onSave()">Kaydet</button>
+      <button class="btn btn-outline-danger" (click)="onCancel()">Vazgeç</button>
+    </div>
+  </div>
+
+</div>

@@ -18,6 +18,18 @@ export class DispatchqueryComponent {
   forceList :ForceDto []=[];
   dispatchSummaryList:DispatchStateSummary []=[];
   dispatchSummaryInput=new DispatchStateSummaryInput();
+  
+  selectedDispatches: any[] = [];
+  selectedIds = new Set<string>();
+
+    // POPUP
+  isPdfPopupVisible = false;
+  pdfDispatchIds: string[] = [];
+
+
+  // popup sonrası gönderim
+  pendingSendIds: string[] = [];
+  canSend = false;
 
   constructor(private dispatchService: DispatchService,private statisticService:StatisticService) {}
 
@@ -84,4 +96,68 @@ export class DispatchqueryComponent {
       error: err => console.error(err)
     })
   }
+
+
+
+onRowClick(e: any) {
+  const id = e.data.dispatchId;
+
+  e.data.selected = !e.data.selected;
+
+  if (e.data.selected) {
+    this.selectedIds.add(id);     
+  } else {
+    this.selectedIds.delete(id);  
+  }
+}
+
+
+onSelectionChanged(e: any) {
+  this.selectedDispatches = e.selectedRowsData;
+  console.log('Seçilen satırlar:', this.selectedDispatches);
+}
+
+openPdf() {
+    if (this.selectedIds.size === 0) return;
+
+    this.pdfDispatchIds = Array.from(this.selectedIds);
+    this.isPdfPopupVisible = true;
+  }
+
+  //  popup tamamen bitince burası çalışır
+  onPdfFinished(finalIds: string[]) {
+    this.selectedIds = new Set(finalIds);
+
+    this.dispatchlist.forEach(d => {
+      d.selected = this.selectedIds.has(d.dispatchId);
+    });
+
+    this.pendingSendIds = finalIds;
+    this.canSend = finalIds.length > 0;
+
+    this.isPdfPopupVisible = false;
+  }
+
+
+saveAndSend() {
+  console.log('BACKEND’E GÖNDERİLEN IDLER:', this.pendingSendIds);
+
+  // örnek backend çağrısı
+  // this.dispatchService.saveAndSend(this.pendingSendIds).subscribe(() => {
+
+   
+    this.selectedIds.clear();
+
+    this.dispatchlist.forEach(d => {
+      d.selected = false;
+    });
+
+   
+    this.pendingSendIds = [];
+    this.canSend = false;
+
+  // });
+}
+
+
 }

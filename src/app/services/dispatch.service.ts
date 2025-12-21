@@ -21,5 +21,8 @@ export class DispatchService {
       return this.http.post<DispatchStateSummary[]>(`${this.url}/summary`, input);
     }
 
+    getDispatchPdf(dispatchId: string) {
+    return this.http.get(`${this.url}/${dispatchId}`,{responseType: 'blob'});} 
+
   
 }

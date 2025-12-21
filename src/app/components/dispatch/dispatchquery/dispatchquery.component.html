@@ -82,22 +82,48 @@
 
       <hr class="my-4">
 
-      <!-- GRID -->
-      <dx-data-grid
-        [dataSource]="dispatchlist"
-        [columnAutoWidth]="true"
-        [showBorders]="true">
+  <dx-data-grid
+    [dataSource]="dispatchlist"
+    [showBorders]="true"
+    (onRowClick)="onRowClick($event)">
 
-        <dxi-column dataField="dispatchCode" caption="Kod"></dxi-column>
-        <dxi-column dataField="hospitalName" caption="Hastane"></dxi-column>
-        <dxi-column dataField="forceName" caption="Kuvvet"></dxi-column>
-        <dxi-column dataField="rankName" caption="Rütbe"></dxi-column>
-        <dxi-column dataField="personFullName" caption="Kişi"></dxi-column>
+    <dxi-column width="50" cellTemplate="checkTemplate"></dxi-column>
+    <dxi-column dataField="dispatchId" caption="Dispatch ID"></dxi-column>
+    <dxi-column dataField="hospitalName" caption="Hastane"></dxi-column>
 
-      </dx-data-grid>
+    <div *dxTemplate="let d of 'checkTemplate'">
+      <input type="checkbox" [checked]="d.data.selected" />
+    </div>
+
+  </dx-data-grid>
+
+  <div class="mt-3 d-flex gap-2">
+    <button class="btn btn-danger" (click)="openPdf()">PDF Aç</button>
+
+    <button
+      *ngIf="canSend"
+      class="btn btn-success"
+      (click)="saveAndSend()">
+      Kaydet ve Gönder
+    </button>
+  </div>
+
+  <dx-popup
+    [(visible)]="isPdfPopupVisible"
+    [width]="900"
+    [height]="700"
+    title="Dispatch PDF">
+
+    <app-dispatchpdf
+      [dispatchIds]="pdfDispatchIds"
+      (finished)="onPdfFinished($event)">
+    </app-dispatchpdf>
+
+  </dx-popup>
+
 
     </div>
-  </dxi-item>
+    </dxi-item>
 
   <!-- TAB 2 -->
   <dxi-item title="Provizyon Durum Ozeti">
@@ -130,15 +156,22 @@
       </div>
 
       <dx-data-grid
-        [dataSource]="dispatchSummaryList"
+        [dataSource]="dispatchlist"
         [columnAutoWidth]="true"
-        [showBorders]="true">
+        [showBorders]="true"
+        [hoverStateEnabled]="true"
+        [selection]="{ mode: 'multiple', showCheckBoxesMode: 'always' }"
+        (onSelectionChanged)="onSelectionChanged($event)">
 
-        <dxi-column dataField="personId" caption="Kisi Id"></dxi-column>
-        <dxi-column dataField="purchaseId" caption="Alım Numarası"></dxi-column>
-        <dxi-column dataField="currentState" caption="Durumu"></dxi-column>
-        <dxi-column dataField="dateTime"caption="Tarih" format="shortDate"></dxi-column>
-      </dx-data-grid>
+        <dxi-column dataField="dispatchId" caption="Provizyon Numarası"></dxi-column>
+        <dxi-column dataField="dispatchCode" caption="Kod"></dxi-column>
+        <dxi-column dataField="hospitalName" caption="Hastane"></dxi-column>
+        <dxi-column dataField="forceName" caption="Kuvvet"></dxi-column>
+        <dxi-column dataField="rankName" caption="Rütbe"></dxi-column>
+        <dxi-column dataField="personFullName" caption="Kişi"></dxi-column>
+
+    </dx-data-grid>
+
     </div>
   </dxi-item>
 

@@ -28,6 +28,7 @@ import { HospitalComponent } from './components/definitions/hospital/hospital.co
 import { CityComponent } from './components/definitions/city/city.component';
 import { DispatchComponent } from './components/dispatch/dispatch.component';
 import { DispatchqueryComponent } from './components/dispatch/dispatchquery/dispatchquery.component';
+import { DispatchpdfComponent } from './components/dispatch/dispatchpdf/dispatchpdf.component';
 
 // ng g pipe/singerSearch dedigimiz icin otomatik olusturuldu
 
@@ -49,7 +50,8 @@ import { DispatchqueryComponent } from './components/dispatch/dispatchquery/disp
     HospitalComponent,
     CityComponent,
     DispatchComponent,
-    DispatchqueryComponent ,
+    DispatchqueryComponent,
+    DispatchpdfComponent ,
 
     
   ],
